@@ -27,9 +27,9 @@
         <updated>2021-08-19T02:01:53.982Z</updated>
     </entry>
     <entry>
-        <id>https://github.com/Mayizono/miyazono.github.io/2021/08/17/Day10-%E7%BB%A7%E6%89%BF/</id>
+        <id>https://github.com/Mayizono/miyazono.github.io/2021/08/17/computer-science/java/course-1/Day10-%E7%BB%A7%E6%89%BF/</id>
         <title>Java基础--继承</title>
-        <link rel="alternate" href="https://github.com/Mayizono/miyazono.github.io/2021/08/17/Day10-%E7%BB%A7%E6%89%BF/"/>
+        <link rel="alternate" href="https://github.com/Mayizono/miyazono.github.io/2021/08/17/computer-science/java/course-1/Day10-%E7%BB%A7%E6%89%BF/"/>
         <content type="html">&lt;h1 id=&#34;第一章-继承&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#第一章-继承&#34;&gt;#&lt;/a&gt; 第一章 继承&lt;/h1&gt;
 &lt;h2 id=&#34;11-继承的概述&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#11-继承的概述&#34;&gt;#&lt;/a&gt; 1.1 继承的概述&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;继承:&lt;/strong&gt; 就是子类继承父类的属性和行为，使得子类对象具有与父类相同的属性、相同的行为。&lt;/p&gt;
