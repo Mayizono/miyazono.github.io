@@ -71,17 +71,13 @@
         </item>
         <item>
             <guid isPermalink="true">https://github.com/Mayizono/miyazono.github.io/big-data/flume/course-2/Flume%E7%BB%83%E4%B9%A0%E9%A2%98/</guid>
-            <title></title>
+            <title>Flume练习题</title>
             <link>https://github.com/Mayizono/miyazono.github.io/big-data/flume/course-2/Flume%E7%BB%83%E4%B9%A0%E9%A2%98/</link>
+            <category term="大数据" scheme="https://github.com/Mayizono/miyazono.github.io/categories/big-data/" />
+            <category term="Flume" scheme="https://github.com/Mayizono/miyazono.github.io/categories/big-data/flume/" />
+            <category term="Flume题目" scheme="https://github.com/Mayizono/miyazono.github.io/categories/big-data/flume/course-2/" />
             <pubDate>Sun, 22 Aug 2021 00:24:07 +0800</pubDate>
-            <description><![CDATA[ &lt;hr /&gt;
-&lt;p&gt;title： Flume 练习题&lt;br /&gt;
- categories：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;[大数据，Flume, Flume 题目]&lt;/li&gt;
-&lt;/ul&gt;
-&lt;hr /&gt;
-&lt;h1 id=&#34;flume练习题&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#flume练习题&#34;&gt;#&lt;/a&gt; Flume 练习题&lt;/h1&gt;
+            <description><![CDATA[ &lt;h1 id=&#34;flume练习题&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#flume练习题&#34;&gt;#&lt;/a&gt; Flume 练习题&lt;/h1&gt;
 &lt;hr /&gt;
 &lt;h2 id=&#34;题目1&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#题目1&#34;&gt;#&lt;/a&gt; 题目 1&lt;/h2&gt;
 &lt;p&gt;需求：使用 Flume 监听一个端口，收集该端口数据，并打印到控制台。&lt;/p&gt;
