@@ -129,6 +129,8 @@
             <guid isPermalink="true">https://github.com/Mayizono/miyazono.github.io/big-data/kafka/Kafka%E6%80%BB%E7%BB%93/</guid>
             <title>Kafka学习</title>
             <link>https://github.com/Mayizono/miyazono.github.io/big-data/kafka/Kafka%E6%80%BB%E7%BB%93/</link>
+            <category term="大数据" scheme="https://github.com/Mayizono/miyazono.github.io/categories/big-data/" />
+            <category term="Kafka" scheme="https://github.com/Mayizono/miyazono.github.io/categories/big-data/kafka/" />
             <pubDate>Wed, 12 Aug 2020 00:00:00 +0800</pubDate>
             <description><![CDATA[ &lt;h1 id=&#34;kafka总结&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#kafka总结&#34;&gt;#&lt;/a&gt; Kafka 总结&lt;/h1&gt;
 &lt;hr /&gt;
