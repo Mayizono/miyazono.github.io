@@ -40,6 +40,325 @@
 &lt;figure class=&#34;highlight sql&#34;&gt;&lt;figcaption data-lang=&#34;SQL&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;同时在线人数的表多次被使用&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token keyword&#34;&gt;with&lt;/span&gt; t &lt;span class=&#34;token keyword&#34;&gt;as&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    &lt;span class=&#34;token keyword&#34;&gt;select&lt;/span&gt; id&lt;span class=&#34;token punctuation&#34;&gt;,&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;           dt&lt;span class=&#34;token punctuation&#34;&gt;,&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;           &lt;span class=&#34;token function&#34;&gt;sum&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;flag&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;token keyword&#34;&gt;over&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;token keyword&#34;&gt;order&lt;/span&gt; &lt;span class=&#34;token keyword&#34;&gt;by&lt;/span&gt; dt&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt; people&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    &lt;span class=&#34;token keyword&#34;&gt;from&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;token keyword&#34;&gt;select&lt;/span&gt; id&lt;span class=&#34;token punctuation&#34;&gt;,&lt;/span&gt; stt dt&lt;span class=&#34;token punctuation&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;1&lt;/span&gt; flag&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;          &lt;span class=&#34;token keyword&#34;&gt;from&lt;/span&gt; zhubo&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;8&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;          &lt;span class=&#34;token keyword&#34;&gt;union&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;9&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;          &lt;span class=&#34;token keyword&#34;&gt;select&lt;/span&gt; id&lt;span class=&#34;token punctuation&#34;&gt;,&lt;/span&gt; edt dt&lt;span class=&#34;token punctuation&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;token operator&#34;&gt;-&lt;/span&gt;&lt;span class=&#34;token number&#34;&gt;1&lt;/span&gt; flag&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;10&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;          &lt;span class=&#34;token keyword&#34;&gt;from&lt;/span&gt; zhubo&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt; t1&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;11&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;12&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token keyword&#34;&gt;select&lt;/span&gt; dt&lt;span class=&#34;token punctuation&#34;&gt;,&lt;/span&gt; people&lt;span class=&#34;token punctuation&#34;&gt;,&lt;/span&gt; dtt&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;13&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token keyword&#34;&gt;from&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;14&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;         &lt;span class=&#34;token keyword&#34;&gt;select&lt;/span&gt; dt&lt;span class=&#34;token punctuation&#34;&gt;,&lt;/span&gt; people&lt;span class=&#34;token punctuation&#34;&gt;,&lt;/span&gt; lead&lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;dt&lt;span class=&#34;token punctuation&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;token keyword&#34;&gt;over&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;token keyword&#34;&gt;order&lt;/span&gt; &lt;span class=&#34;token keyword&#34;&gt;by&lt;/span&gt; dt&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt; dtt&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;15&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;         &lt;span class=&#34;token keyword&#34;&gt;from&lt;/span&gt; t&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;16&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;     &lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt; t1&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;17&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;         &lt;span class=&#34;token keyword&#34;&gt;join&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;18&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    &lt;span class=&#34;token keyword&#34;&gt;select&lt;/span&gt; &lt;span class=&#34;token function&#34;&gt;max&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;people&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt; max_p&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;19&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    &lt;span class=&#34;token keyword&#34;&gt;from&lt;/span&gt; t&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;20&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt; t2 &lt;span class=&#34;token keyword&#34;&gt;on&lt;/span&gt; t1&lt;span class=&#34;token punctuation&#34;&gt;.&lt;/span&gt;people &lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt; t2&lt;span class=&#34;token punctuation&#34;&gt;.&lt;/span&gt;max_p&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt; ]]></description>
         </item>
         <item>
+            <guid isPermalink="true">https://github.com/Mayizono/miyazono.github.io/big-data/flink/Flink%E7%AE%A1%E7%90%86Kafka%E7%9A%84%E6%B6%88%E8%B4%B9%E4%BD%8D%E7%82%B9/</guid>
+            <title>Flink管理 Kafka 消费位点</title>
+            <link>https://github.com/Mayizono/miyazono.github.io/big-data/flink/Flink%E7%AE%A1%E7%90%86Kafka%E7%9A%84%E6%B6%88%E8%B4%B9%E4%BD%8D%E7%82%B9/</link>
+            <category term="大数据" scheme="https://github.com/Mayizono/miyazono.github.io/categories/big-data/" />
+            <category term="Flink" scheme="https://github.com/Mayizono/miyazono.github.io/categories/big-data/flink/" />
+            <pubDate>Tue, 03 Nov 2020 00:00:00 +0800</pubDate>
+            <description><![CDATA[ &lt;p&gt;检查点（Checkpoint）是使 Apache Flink 能从故障恢复的一种内部机制。检查点是 Flink 应用状态的一个一致性副本，包括了输入的读取位点。在发生故障时，Flink 通过从检查点加载应用程序状态来恢复，并从恢复的读取位点继续处理，就好像什么事情都没发生一样。你可以把检查点想象成电脑游戏的存档一样。如果你在游戏中发生了什么事情，你可以随时读档重来一次。&lt;/p&gt;
+&lt;p&gt;检查点使得 Apache Flink 具有容错能力，并确保了即时发生故障也能保证流应用程序的语义。检查点是以固定的间隔来触发的，该间隔可以在应用中配置。&lt;/p&gt;
+&lt;p&gt;Apache Flink 中实现的 Kafka 消费者是一个有状态的算子（operator），它集成了 Flink 的检查点机制，它的状态是所有 Kafka 分区的读取偏移量。当一个检查点被触发时，每一个分区的偏移量都被存到了这个检查点中。Flink 的检查点机制保证了所有 operator task 的存储状态都是一致的。这里的 “一致的” 是什么意思呢？意思是它们存储的状态都是&lt;strong&gt;基于相同的输入数据&lt;/strong&gt;。当所有的 operator task 成功存储了它们的状态，一个检查点才算完成。因此，当从潜在的系统故障中恢复时，系统提供了 excatly-once 的状态更新语义。&lt;/p&gt;
+&lt;p&gt;下面我们将一步步地介绍 Apache Flink 中的 Kafka 消费位点是如何做检查点的。在本文的例子中，数据被存在了 Flink 的 JobMaster 中。值得注意的是，在 POC 或生产用例下，这些数据最好是能存到一个外部文件系统（如 HDFS 或 S3）中。&lt;/p&gt;
+&lt;h3 id=&#34;第一步&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#第一步&#34;&gt;#&lt;/a&gt; 第一步：&lt;/h3&gt;
+&lt;p&gt;如下所示，一个 Kafka topic，有两个 partition，每个 partition 都含有 “A”, “B”, “C”, ”D”, “E” 5 条消息。我们将两个 partition 的偏移量（offset）都设置为 0.&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1QQ91nhTpK1RjSZR0XXbEwXXa-842-415.png&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;第二步&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#第二步&#34;&gt;#&lt;/a&gt; 第二步：&lt;/h3&gt;
+&lt;p&gt;Kafka comsumer（消费者）开始从 partition 0 读取消息。消息 “A” 正在被处理，第一个 consumer 的 offset 变成了 1。&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1jBS2nb2pK1RjSZFsXXaNlXXa-842-420.png&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;第三步&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#第三步&#34;&gt;#&lt;/a&gt; 第三步：&lt;/h3&gt;
+&lt;p&gt;消息 “A” 到达了 Flink Map Task。两个 consumer 都开始读取他们下一条消息（partition 0 读取 “B”，partition 1 读取 “A”）。各自将 offset 更新成 2 和 1 。同时，Flink 的 JobMaster 开始在 source 触发了一个检查点。&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1ZNS8nkvoK1RjSZFNXXcxMVXa-842-423.png&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;第四步&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#第四步&#34;&gt;#&lt;/a&gt; 第四步：&lt;/h3&gt;
+&lt;p&gt;接下来，由于 source 触发了检查点，Kafka consumer 创建了它们状态的第一个快照（”offset = 2, 1”），并将快照存到了 Flink 的 JobMaster 中。Source 在消息 “B” 和 “A” 从 partition 0 和 1 发出后，发了一个 checkpoint barrier。Checkopint barrier 用于各个 operator task 之间对齐检查点，保证了整个检查点的一致性。消息 “A” 到达了 Flink Map Task，而上面的 consumer 继续读取下一条消息（消息 “C”）。&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1o4TbnkzoK1RjSZFlXXai4VXa-842-447.png&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;第五步&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#第五步&#34;&gt;#&lt;/a&gt; 第五步：&lt;/h3&gt;
+&lt;p&gt;Flink Map Task 收齐了同一版本的全部 checkpoint barrier 后，那么就会将它自己的状态也存储到 JobMaster。同时，consumer 会继续从 Kafka 读取消息。&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1EI2XngHqK1RjSZFkXXX.WFXa-842-439.png&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;第六步&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#第六步&#34;&gt;#&lt;/a&gt; 第六步：&lt;/h3&gt;
+&lt;p&gt;Flink Map Task 完成了它自己状态的快照流程后，会向 Flink JobMaster 汇报它已经完成了这个 checkpoint。当所有的 task 都报告完成了它们的状态 checkpoint 后，JobMaster 就会将这个 checkpoint 标记为成功。从此刻开始，这个 checkpoint 就可以用于故障恢复了。值得一提的是，Flink 并不依赖 Kafka offset 从系统故障中恢复。&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1huHtnhnaK1RjSZFBXXcW7VXa-842-417.png&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;故障恢复&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#故障恢复&#34;&gt;#&lt;/a&gt; 故障恢复&lt;/h3&gt;
+&lt;p&gt;在发生故障时（比如，某个 worker 挂了），所有的 operator task 会被重启，而他们的状态会被重置到最近一次成功的 checkpoint。Kafka source 分别从 offset 2 和 1 重新开始读取消息（因为这是完成的 checkpoint 中存的 offset）。当作业重启后，我们可以期待正常的系统操作，就好像之前没有发生故障一样。如下图所示：&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://img.alicdn.com/tfs/TB1o8zXnmzqK1RjSZFjXXblCFXa-842-411.png&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+ ]]></description>
+        </item>
+        <item>
+            <guid isPermalink="true">https://github.com/Mayizono/miyazono.github.io/big-data/flink/Flink%E7%9A%84%E5%BC%82%E6%AD%A5IO/</guid>
+            <title>Flink的异步IO</title>
+            <link>https://github.com/Mayizono/miyazono.github.io/big-data/flink/Flink%E7%9A%84%E5%BC%82%E6%AD%A5IO/</link>
+            <category term="大数据" scheme="https://github.com/Mayizono/miyazono.github.io/categories/big-data/" />
+            <category term="Flink" scheme="https://github.com/Mayizono/miyazono.github.io/categories/big-data/flink/" />
+            <pubDate>Fri, 23 Oct 2020 00:00:00 +0800</pubDate>
+            <description><![CDATA[ &lt;h2 id=&#34;背景&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#背景&#34;&gt;#&lt;/a&gt; 背景&lt;/h2&gt;
+&lt;p&gt;Async I/O 是阿里巴巴贡献给社区的一个呼声非常高的特性，于 1.2 版本引入。主要目的是为了解决与外部系统交互时网络延迟成为了系统瓶颈的问题。&lt;/p&gt;
+&lt;p&gt;流计算系统中经常需要与外部系统进行交互，比如需要查询外部数据库以关联上用户的额外信息。通常，我们的实现方式是向数据库发送用户 &lt;code&gt;a&lt;/code&gt;  的查询请求，然后等待结果返回，在这之前，我们无法发送用户 &lt;code&gt;b&lt;/code&gt;  的查询请求。这是一种同步访问的模式，如下图左边所示。&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB11fwcRXXXXXXwXpXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;图中棕色的长条表示等待时间，可以发现网络等待时间极大地阻碍了吞吐和延迟。为了解决同步访问的问题，异步模式可以并发地处理多个请求和回复。也就是说，你可以连续地向数据库发送用户 &lt;code&gt;a&lt;/code&gt; 、 &lt;code&gt;b&lt;/code&gt; 、 &lt;code&gt;c&lt;/code&gt;  等的请求，与此同时，哪个请求的回复先返回了就处理哪个回复，从而连续的请求之间不需要阻塞等待，如上图右边所示。这也正是 Async I/O 的实现原理。&lt;/p&gt;
+&lt;h2 id=&#34;async-io&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#async-io&#34;&gt;#&lt;/a&gt; Async I/O&lt;/h2&gt;
+&lt;p&gt;使用 Async I/O 的前提是需要一个支持异步请求的客户端。当然，没有异步请求客户端的话也可以将同步客户端丢到线程池中执行作为异步客户端。Flink 提供了非常简洁的 API，让用户只需要关注业务逻辑，一些脏活累活比如消息顺序性和一致性保证都由框架处理了，多么棒的事情！&lt;/p&gt;
+&lt;p&gt;使用方式如下方代码片段所示（来自官网文档）：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;/** &#39;AsyncFunction&#39; 的一个实现，向数据库发送异步请求并设置回调 */
+class AsyncDatabaseRequest extends AsyncFunction[String, (String, String)] &amp;#123;
+
+    /** 可以异步请求的特定数据库的客户端 */
+    lazy val client: DatabaseClient = new DatabaseClient(host, post, credentials)
+
+    /** future 的回调的执行上下文（当前线程） */
+    implicit lazy val executor: ExecutionContext = ExecutionContext.fromExecutor(Executors.directExecutor())
+
+    override def asyncInvoke(str: String, asyncCollector: AsyncCollector[(String, String)]): Unit = &amp;#123;
+
+        // 发起一个异步请求，返回结果的 future
+        val resultFuture: Future[String] = client.query(str)
+
+        // 设置请求完成时的回调: 将结果传递给 collector
+        resultFuture.onSuccess &amp;#123;
+            case result: String =&amp;gt; asyncCollector.collect(Iterable((str, result)));
+        &amp;#125;
+    &amp;#125;
+&amp;#125;
+
+// 创建一个原始的流
+val stream: DataStream[String] = ...
+
+// 添加一个 async I/O 的转换
+val resultStream: DataStream[(String, String)] =
+    AsyncDataStream.(un)orderedWait(
+      stream, new AsyncDatabaseRequest(),
+      1000, TimeUnit.MILLISECONDS, // 超时时间
+      100)  // 进行中的异步请求的最大数量
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;code&gt;AsyncDataStream&lt;/code&gt;  有两个静态方法， &lt;code&gt;orderedWait&lt;/code&gt;  和  &lt;code&gt;unorderedWait&lt;/code&gt; ，对应了两种输出模式：有序和无序。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;有序：消息的发送顺序与接受到的顺序相同（包括 watermark ），也就是先进先出。&lt;/li&gt;
+&lt;li&gt;无序：
+&lt;ul&gt;
+&lt;li&gt;在 ProcessingTime 的情况下，完全无序，先返回的结果先发送。&lt;/li&gt;
+&lt;li&gt;在 EventTime 的情况下，watermark 不能超越消息，消息也不能超越 watermark，也就是说 watermark 定义的顺序的边界。在两个 watermark 之间的消息的发送是无序的，但是在 watermark 之后的消息不能先于该 watermark 之前的消息发送。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;原理实现&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#原理实现&#34;&gt;#&lt;/a&gt; 原理实现&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;AsyncDataStream.(un)orderedWait&lt;/code&gt;  的主要工作就是创建了一个  &lt;code&gt;AsyncWaitOperator&lt;/code&gt; 。 &lt;code&gt;AsyncWaitOperator&lt;/code&gt;  是支持异步 IO 访问的算子实现，该算子会运行  &lt;code&gt;AsyncFunction&lt;/code&gt;  并处理异步返回的结果，其内部原理如下图所示。&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1tBPQRXXXXXX2aXXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;如图所示， &lt;code&gt;AsyncWaitOperator&lt;/code&gt;  主要由两部分组成： &lt;code&gt;StreamElementQueue&lt;/code&gt;  和  &lt;code&gt;Emitter&lt;/code&gt; 。StreamElementQueue 是一个 Promise 队列，所谓 Promise 是一种异步抽象表示将来会有一个值（参考 &lt;span class=&#34;exturl&#34; data-url=&#34;aHR0cDovL2RvY3Muc2NhbGEtbGFuZy5vcmcvemgtY24vb3ZlcnZpZXdzL2NvcmUvZnV0dXJlcy5odG1sI3Byb21pc2Vz&#34;&gt;Scala Promise&lt;/span&gt; 了解更多），这个队列是未完成的 Promise 队列，也就是进行中的请求队列。Emitter 是一个单独的线程，负责发送消息（收到的异步回复）给下游。&lt;/p&gt;
+&lt;p&gt;图中 &lt;code&gt;E5&lt;/code&gt;  表示进入该算子的第五个元素（”Element-5”），在执行过程中首先会将其包装成一个 “Promise”  &lt;code&gt;P5&lt;/code&gt; ，然后将 &lt;code&gt;P5&lt;/code&gt;  放入队列。最后调用  &lt;code&gt;AsyncFunction&lt;/code&gt;  的  &lt;code&gt;ayncInvoke&lt;/code&gt;  方法，该方法会向外部服务发起一个异步的请求，并注册回调。该回调会在异步请求成功返回时调用  &lt;code&gt;AsyncCollector.collect&lt;/code&gt;  方法将返回的结果交给框架处理。实际上  &lt;code&gt;AsyncCollector&lt;/code&gt;  是一个 Promise ，也就是  &lt;code&gt;P5&lt;/code&gt; ，在调用  &lt;code&gt;collect&lt;/code&gt;  的时候会标记 Promise 为完成状态，并通知 Emitter 线程有完成的消息可以发送了。Emitter 就会从队列中拉取完成的 Promise ，并从 Promise 中取出消息发送给下游。&lt;/p&gt;
+&lt;h3 id=&#34;消息的顺序性&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#消息的顺序性&#34;&gt;#&lt;/a&gt; 消息的顺序性&lt;/h3&gt;
+&lt;p&gt;上文提到 Async I/O 提供了两种输出模式。其实细分有三种模式：有序，ProcessingTime 无序，EventTime 无序。Flink 使用队列来实现不同的输出模式，并抽象出一个队列的接口（ &lt;code&gt;StreamElementQueue&lt;/code&gt; ），这种分层设计使得 &lt;code&gt;AsyncWaitOperator&lt;/code&gt;  和 &lt;code&gt;Emitter&lt;/code&gt;  不用关心消息的顺序问题。 &lt;code&gt;StreamElementQueue&lt;/code&gt;  有两种具体实现，分别是  &lt;code&gt;OrderedStreamElementQueue&lt;/code&gt;  和  &lt;code&gt;UnorderedStreamElementQueue&lt;/code&gt; 。 &lt;code&gt;UnorderedStreamElementQueue&lt;/code&gt;  比较有意思，它使用了一套逻辑巧妙地实现完全无序和 EventTime 无序。&lt;/p&gt;
+&lt;h4 id=&#34;有序&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#有序&#34;&gt;#&lt;/a&gt; 有序&lt;/h4&gt;
+&lt;p&gt;有序比较简单，使用一个队列就能实现。所有新进入该算子的元素（包括 watermark），都会包装成 Promise 并按到达顺序放入该队列。如下图所示，尽管 &lt;code&gt;P4&lt;/code&gt;  的结果先返回，但并不会发送，只有  &lt;code&gt;P1&lt;/code&gt;  （队首）的结果返回了才会触发 Emitter 拉取队首元素进行发送。&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB16DYTRXXXXXbWXVXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;h4 id=&#34;processingtime-无序&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#processingtime-无序&#34;&gt;#&lt;/a&gt; ProcessingTime 无序&lt;/h4&gt;
+&lt;p&gt;ProcessingTime 无序也比较简单，因为没有 watermark，不需要协调 watermark 与消息的顺序性，所以使用两个队列就能实现，一个  &lt;code&gt;uncompletedQueue&lt;/code&gt;  一个  &lt;code&gt;completedQueue&lt;/code&gt; 。所有新进入该算子的元素，同样的包装成 Promise 并放入  &lt;code&gt;uncompletedQueue&lt;/code&gt;  队列，当 &lt;code&gt;uncompletedQueue&lt;/code&gt;  队列中任意的 Promise 返回了数据，则将该 Promise 移到  &lt;code&gt;completedQueue&lt;/code&gt;  队列中，并通知 Emitter 消费。如下图所示：&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1zzsnRXXXXXbNXXXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;h4 id=&#34;eventtime-无序&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#eventtime-无序&#34;&gt;#&lt;/a&gt; EventTime 无序&lt;/h4&gt;
+&lt;p&gt;EventTime 无序类似于有序与 ProcessingTime 无序的结合体。因为有 watermark，需要协调 watermark 与消息之间的顺序性，所以 &lt;code&gt;uncompletedQueue&lt;/code&gt;  中存放的元素从原先的 Promise 变成了 Promise 集合。如果进入算子的是消息元素，则会包装成 Promise 放入队尾的集合中。如果进入算子的是 watermark，也会包装成 Promise 并放到一个独立的集合中，再将该集合加入到  &lt;code&gt;uncompletedQueue&lt;/code&gt;  队尾，最后再创建一个空集合加到  &lt;code&gt;uncompletedQueue&lt;/code&gt;  队尾。这样，watermark 就成了消息顺序的边界。只有处在队首的集合中的 Promise 返回了数据，才能将该 Promise 移到  &lt;code&gt;completedQueue&lt;/code&gt;  队列中，由 Emitter 消费发往下游。只有队首集合空了，才能处理第二个集合。这样就保证了当且仅当某个 watermark 之前所有的消息都已经被发送了，该 watermark 才能被发送。过程如下图所示：&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1TnrsRXXXXXaKaVXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;快照与恢复&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#快照与恢复&#34;&gt;#&lt;/a&gt; 快照与恢复&lt;/h3&gt;
+&lt;p&gt;分布式快照机制是为了保证状态的一致性。我们需要分析哪些状态是需要快照的，哪些是不需要的。首先，已经完成回调并且已经发往下游的元素是不需要快照的。否则，会导致重发，那就不是 exactly-once 了。而已经完成回调且未发往下游的元素，加上未完成回调的元素，就是上述队列中的所有元素。&lt;/p&gt;
+&lt;p&gt;所以快照的逻辑也非常简单，(1) 清空原有的状态存储，(2) 遍历队列中的所有 Promise，从中取出  &lt;code&gt;StreamElement&lt;/code&gt; （消息或 watermark）并放入状态存储中，(3) 执行快照操作。&lt;/p&gt;
+&lt;p&gt;恢复的时候，从快照中读取所有的元素全部再处理一次，当然包括之前已完成回调的元素。所以在失败恢复后，会有元素重复请求外部服务，但是每个回调的结果只会被发往下游一次。&lt;/p&gt;
+ ]]></description>
+        </item>
+        <item>
+            <guid isPermalink="true">https://github.com/Mayizono/miyazono.github.io/big-data/flink/Flink%E7%9A%84Window%E6%9C%BA%E5%88%B6/</guid>
+            <title>Flink的窗口机制</title>
+            <link>https://github.com/Mayizono/miyazono.github.io/big-data/flink/Flink%E7%9A%84Window%E6%9C%BA%E5%88%B6/</link>
+            <category term="大数据" scheme="https://github.com/Mayizono/miyazono.github.io/categories/big-data/" />
+            <category term="Flink" scheme="https://github.com/Mayizono/miyazono.github.io/categories/big-data/flink/" />
+            <pubDate>Sat, 17 Oct 2020 00:00:00 +0800</pubDate>
+            <description><![CDATA[ &lt;p&gt;Flink 认为 Batch 是 Streaming 的一个特例，所以 Flink 底层引擎是一个流式引擎，在上面实现了流处理和批处理。而窗口（window）就是从 Streaming 到 Batch 的一个桥梁。Flink 提供了非常完善的窗口机制，这是我认为的 Flink 最大的亮点之一（其他的亮点包括消息乱序处理，和 checkpoint 机制）。这里介绍流式处理中的窗口概念，介绍 Flink 内建的一些窗口和 Window API，最后讨论下窗口在底层是如何实现的。&lt;/p&gt;
+&lt;h2 id=&#34;什么是-window&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#什么是-window&#34;&gt;#&lt;/a&gt; 什么是 Window&lt;/h2&gt;
+&lt;p&gt;在流处理应用中，数据是连续不断的，因此我们不可能等到所有数据都到了才开始处理。当然我们可以每来一个消息就处理一次，但是有时我们需要做一些聚合类的处理，例如：在过去的 1 分钟内有多少用户点击了我们的网页。在这种情况下，我们必须定义一个窗口，用来收集最近一分钟内的数据，并对这个窗口内的数据进行计算。&lt;/p&gt;
+&lt;p&gt;窗口可以是时间驱动的（Time Window，例如：每 30 秒钟），也可以是数据驱动的（Count Window，例如：每一百个元素）。一种经典的窗口分类可以分成：翻滚窗口（Tumbling Window，无重叠），滚动窗口（Sliding Window，有重叠），和会话窗口（Session Window，活动间隙）。&lt;/p&gt;
+&lt;p&gt;我们举个具体的场景来形象地理解不同窗口的概念。假设，淘宝网会记录每个用户每次购买的商品个数，我们要做的是统计不同窗口中用户购买商品的总数。下图给出了几种经典的窗口切分概述图：&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1bwsTJVXXXXaBaXXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;上图中，raw data stream 代表用户的购买行为流，圈中的数字代表该用户本次购买的商品个数，事件是按时间分布的，所以可以看出事件之间是有 time gap 的。Flink 提供了上图中所有的窗口类型，下面我们会逐一进行介绍。&lt;/p&gt;
+&lt;h3 id=&#34;time-window&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#time-window&#34;&gt;#&lt;/a&gt; Time Window&lt;/h3&gt;
+&lt;p&gt;就如名字所说的，Time Window 是根据时间对数据流进行分组的。这里我们涉及到了流处理中的时间问题，时间问题和消息乱序问题是紧密关联的，这是流处理中现存的难题之一，我们将在后续的 &lt;span class=&#34;exturl&#34; data-url=&#34;aHR0cDovL3d1Y2hvbmcubWUvYmxvZy8yMDE2LzA1LzI1L2ZsaW5rLWludGVybmFscy13aW5kb3ctbWVjaGFuaXNtLyM=&#34;&gt;EventTime 和消息乱序处理&lt;/span&gt;中对这部分问题进行深入探讨。这里我们只需要知道 Flink 提出了三种时间的概念，分别是 event time（事件时间：事件发生时的时间），ingestion time（摄取时间：事件进入流处理系统的时间），processing time（处理时间：消息被计算处理的时间）。Flink 中窗口机制和时间类型是完全解耦的，也就是说当需要改变时间类型时不需要更改窗口逻辑相关的代码。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Tumbling Time Window&lt;/strong&gt;&lt;br /&gt;
+ 如上图，我们需要统计每一分钟中用户购买的商品的总数，需要将用户的行为事件按每一分钟进行切分，这种切分被成为翻滚时间窗口（Tumbling Time Window）。翻滚窗口能将数据流切分成不重叠的窗口，每一个事件只能属于一个窗口。通过使用 DataStream API，我们可以这样实现：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;// Stream of (userId, buyCnt)
+val buyCnts: DataStream[(Int, Int)] = ...
+
+val tumblingCnts: DataStream[(Int, Int)] = buyCnts
+  // key stream by userId
+  .keyBy(0) 
+  // tumbling time window of 1 minute length
+  .timeWindow(Time.minutes(1))
+  // compute sum over buyCnt
+  .sum(1)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Sliding Time Window&lt;/strong&gt;&lt;br /&gt;
+ 但是对于某些应用，它们需要的窗口是不间断的，需要平滑地进行窗口聚合。比如，我们可以每 30 秒计算一次最近一分钟用户购买的商品总数。这种窗口我们称为滑动时间窗口（Sliding Time Window）。在滑窗中，一个元素可以对应多个窗口。通过使用 DataStream API，我们可以这样实现：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;val slidingCnts: DataStream[(Int, Int)] = buyCnts
+  .keyBy(0) 
+  // sliding time window of 1 minute length and 30 secs trigger interval
+  .timeWindow(Time.minutes(1), Time.seconds(30))
+  .sum(1)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;count-window&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#count-window&#34;&gt;#&lt;/a&gt; Count Window&lt;/h3&gt;
+&lt;p&gt;Count Window 是根据元素个数对数据流进行分组的。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Tumbling Count Window&lt;/strong&gt;&lt;br /&gt;
+ 当我们想要每 100 个用户购买行为事件统计购买总数，那么每当窗口中填满 100 个元素了，就会对窗口进行计算，这种窗口我们称之为翻滚计数窗口（Tumbling Count Window），上图所示窗口大小为 3 个。通过使用 DataStream API，我们可以这样实现：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;// Stream of (userId, buyCnts)
+val buyCnts: DataStream[(Int, Int)] = ...
+
+val tumblingCnts: DataStream[(Int, Int)] = buyCnts
+  // key stream by sensorId
+  .keyBy(0)
+  // tumbling count window of 100 elements size
+  .countWindow(100)
+  // compute the buyCnt sum 
+  .sum(1)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Sliding Count Window&lt;/strong&gt;&lt;br /&gt;
+ 当然 Count Window 也支持 Sliding Window，虽在上图中未描述出来，但和 Sliding Time Window 含义是类似的，例如计算每 10 个元素计算一次最近 100 个元素的总和，代码示例如下。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;val slidingCnts: DataStream[(Int, Int)] = vehicleCnts
+  .keyBy(0)
+  // sliding count window of 100 elements size and 10 elements trigger interval
+  .countWindow(100, 10)
+  .sum(1)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;session-window&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#session-window&#34;&gt;#&lt;/a&gt; Session Window&lt;/h3&gt;
+&lt;p&gt;在这种用户交互事件流中，我们首先想到的是将事件聚合到会话窗口中（一段用户持续活跃的周期），由非活跃的间隙分隔开。如上图所示，就是需要计算每个用户在活跃期间总共购买的商品数量，如果用户 30 秒没有活动则视为会话断开（假设 raw data stream 是单个用户的购买行为流）。Session Window 的示例代码如下：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;// Stream of (userId, buyCnts)
+val buyCnts: DataStream[(Int, Int)] = ...
+  
+val sessionCnts: DataStream[(Int, Int)] = vehicleCnts
+  .keyBy(0)
+  // session window based on a 30 seconds session gap interval 
+  .window(ProcessingTimeSessionWindows.withGap(Time.seconds(30)))
+  .sum(1)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;一般而言，window 是在无限的流上定义了一个有限的元素集合。这个集合可以是基于时间的，元素个数的，时间和个数结合的，会话间隙的，或者是自定义的。Flink 的 DataStream API 提供了简洁的算子来满足常用的窗口操作，同时提供了通用的窗口机制来允许用户自己定义窗口分配逻辑。下面我们会对 Flink 窗口相关的 API 进行剖析。&lt;/p&gt;
+&lt;h2 id=&#34;剖析-window-api&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#剖析-window-api&#34;&gt;#&lt;/a&gt; 剖析 Window API&lt;/h2&gt;
+&lt;p&gt;得益于 Flink Window API 松耦合设计，我们可以非常灵活地定义符合特定业务的窗口。Flink 中定义一个窗口主要需要以下三个组件。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;**Window Assigner：** 用来决定某个元素被分配到哪个 / 哪些窗口中去。&lt;/p&gt;
+&lt;p&gt;如下类图展示了目前内置实现的 Window Assigners：&lt;br /&gt;
+&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1plkxJVXXXXXqXpXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;**Trigger：** 触发器。决定了一个窗口何时能够被计算或清除，每个窗口都会拥有一个自己的 Trigger。&lt;/p&gt;
+&lt;p&gt;如下类图展示了目前内置实现的 Triggers：&lt;br /&gt;
+&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB15yMeJVXXXXbbXFXXXXXXXXXX&#34; alt=&#34;img&#34; /&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;**Evictor：** 可以译为 “驱逐者”。在 Trigger 触发之后，在窗口被处理之前，Evictor（如果有 Evictor 的话）会用来剔除窗口中不需要的元素，相当于一个 filter。&lt;/p&gt;
+&lt;p&gt;如下类图展示了目前内置实现的 Evictors：&lt;br /&gt;
+&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1OCT6JVXXXXcjXVXXXXXXXXXX&#34; alt=&#34;img&#34; /&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;上述三个组件的不同实现的不同组合，可以定义出非常复杂的窗口。Flink 中内置的窗口也都是基于这三个组件构成的，当然内置窗口有时候无法解决用户特殊的需求，所以 Flink 也暴露了这些窗口机制的内部接口供用户实现自定义的窗口。下面我们将基于这三者探讨窗口的实现机制。&lt;/p&gt;
+&lt;h2 id=&#34;window-的实现&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#window-的实现&#34;&gt;#&lt;/a&gt; Window 的实现&lt;/h2&gt;
+&lt;p&gt;下图描述了 Flink 的窗口机制以及各组件之间是如何相互工作的。&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1swNgKXXXXXc4XpXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;首先上图中的组件都位于一个算子（window operator）中，数据流源源不断地进入算子，每一个到达的元素都会被交给 WindowAssigner。WindowAssigner 会决定元素被放到哪个或哪些窗口（window），可能会创建新窗口。因为一个元素可以被放入多个窗口中，所以同时存在多个窗口是可能的。注意， &lt;code&gt;Window&lt;/code&gt;  本身只是一个 ID 标识符，其内部可能存储了一些元数据，如 &lt;code&gt;TimeWindow&lt;/code&gt;  中有开始和结束时间，但是并不会存储窗口中的元素。窗口中的元素实际存储在 Key/Value State 中，key 为 &lt;code&gt;Window&lt;/code&gt; ，value 为元素集合（或聚合值）。为了保证窗口的容错性，该实现依赖了 Flink 的 State 机制。&lt;/p&gt;
+&lt;p&gt;每一个窗口都拥有一个属于自己的 Trigger，Trigger 上会有定时器，用来决定一个窗口何时能够被计算或清除。每当有元素加入到该窗口，或者之前注册的定时器超时了，那么 Trigger 都会被调用。Trigger 的返回结果可以是 continue（不做任何操作），fire（处理窗口数据），purge（移除窗口和窗口中的数据），或者 fire + purge。一个 Trigger 的调用结果只是 fire 的话，那么会计算窗口并保留窗口原样，也就是说窗口中的数据仍然保留不变，等待下次 Trigger fire 的时候再次执行计算。一个窗口可以被重复计算多次知道它被 purge 了。在 purge 之前，窗口会一直占用着内存。&lt;/p&gt;
+&lt;p&gt;当 Trigger fire 了，窗口中的元素集合就会交给 &lt;code&gt;Evictor&lt;/code&gt; （如果指定了的话）。Evictor 主要用来遍历窗口中的元素列表，并决定最先进入窗口的多少个元素需要被移除。剩余的元素会交给用户指定的函数进行窗口的计算。如果没有 Evictor 的话，窗口中的所有元素会一起交给函数进行计算。&lt;/p&gt;
+&lt;p&gt;计算函数收到了窗口的元素（可能经过了 Evictor 的过滤），并计算出窗口的结果值，并发送给下游。窗口的结果值可以是一个也可以是多个。DataStream API 上可以接收不同类型的计算函数，包括预定义的 &lt;code&gt;sum()&lt;/code&gt; , &lt;code&gt;min()&lt;/code&gt; , &lt;code&gt;max()&lt;/code&gt; ，还有  &lt;code&gt;ReduceFunction&lt;/code&gt; ， &lt;code&gt;FoldFunction&lt;/code&gt; ，还有 &lt;code&gt;WindowFunction&lt;/code&gt; 。WindowFunction 是最通用的计算函数，其他的预定义的函数基本都是基于该函数实现的。&lt;/p&gt;
+&lt;p&gt;Flink 对于一些聚合类的窗口计算（如 sum,min）做了优化，因为聚合类的计算不需要将窗口中的所有数据都保存下来，只需要保存一个 result 值就可以了。每个进入窗口的元素都会执行一次聚合函数并修改 result 值。这样可以大大降低内存的消耗并提升性能。但是如果用户定义了 Evictor，则不会启用对聚合窗口的优化，因为 Evictor 需要遍历窗口中的所有元素，必须要将窗口中所有元素都存下来。&lt;/p&gt;
+&lt;h2 id=&#34;源码分析&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#源码分析&#34;&gt;#&lt;/a&gt; 源码分析&lt;/h2&gt;
+&lt;p&gt;上述的三个组件构成了 Flink 的窗口机制。为了更清楚地描述窗口机制，以及解开一些疑惑（比如 purge 和 Evictor 的区别和用途），我们将一步步地解释 Flink 内置的一些窗口（Time Window，Count Window，Session Window）是如何实现的。&lt;/p&gt;
+&lt;h3 id=&#34;count-window-实现&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#count-window-实现&#34;&gt;#&lt;/a&gt; Count Window 实现&lt;/h3&gt;
+&lt;p&gt;Count Window 是使用三组件的典范，我们可以在  &lt;code&gt;KeyedStream&lt;/code&gt;  上创建 Count Window，其源码如下所示：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;// tumbling count window
+public WindowedStream&amp;lt;T, KEY, GlobalWindow&amp;gt; countWindow(long size) &amp;#123;
+  return window(GlobalWindows.create())  // create window stream using GlobalWindows
+      .trigger(PurgingTrigger.of(CountTrigger.of(size))); // trigger is window size
+&amp;#125;
+// sliding count window
+public WindowedStream&amp;lt;T, KEY, GlobalWindow&amp;gt; countWindow(long size, long slide) &amp;#123;
+  return window(GlobalWindows.create())
+    .evictor(CountEvictor.of(size))  // evictor is window size
+    .trigger(CountTrigger.of(slide)); // trigger is slide size
+&amp;#125;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;第一个函数是申请翻滚计数窗口，参数为窗口大小。第二个函数是申请滑动计数窗口，参数分别为窗口大小和滑动大小。它们都是基于  &lt;code&gt;GlobalWindows&lt;/code&gt;  这个 WindowAssigner 来创建的窗口，该 assigner 会将所有元素都分配到同一个 global window 中，所有 &lt;code&gt;GlobalWindows&lt;/code&gt;  的返回值一直是  &lt;code&gt;GlobalWindow&lt;/code&gt;  单例。基本上自定义的窗口都会基于该 assigner 实现。&lt;/p&gt;
+&lt;p&gt;翻滚计数窗口并不带 evictor，只注册了一个 trigger。该 trigger 是带 purge 功能的 CountTrigger。也就是说每当窗口中的元素数量达到了 window-size，trigger 就会返回 fire+purge，窗口就会执行计算并清空窗口中的所有元素，再接着储备新的元素。从而实现了 tumbling 的窗口之间无重叠。&lt;/p&gt;
+&lt;p&gt;滑动计数窗口的各窗口之间是有重叠的，但我们用的 GlobalWindows assinger 从始至终只有一个窗口，不像 sliding time assigner 可以同时存在多个窗口。所以 trigger 结果不能带 purge，也就是说计算完窗口后窗口中的数据要保留下来（供下个滑窗使用）。另外，trigger 的间隔是 slide-size，evictor 的保留的元素个数是 window-size。也就是说，每个滑动间隔就触发一次窗口计算，并保留下最新进入窗口的 window-size 个元素，剔除旧元素。&lt;/p&gt;
+&lt;p&gt;假设有一个滑动计数窗口，每 2 个元素计算一次最近 4 个元素的总和，那么窗口工作示意图如下所示：&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB15vcUJVXXXXcGXVXXXXXXXXXX&#34; alt=&#34;img&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;图中所示的各个窗口逻辑上是不同的窗口，但在物理上是同一个窗口。该滑动计数窗口，trigger 的触发条件是元素个数达到 2 个（每进入2 个元素就会触发一次），evictor 保留的元素个数是 4 个，每次计算完窗口总和后会保留剩余的元素。所以第一次触发 trigger 是当元素 5 进入，第三次触发 trigger 是当元素 2 进入，并驱逐 5 和 2，计算剩余的 4 个元素的总和（22）并发送出去，保留下 2,4,9,7 元素供下个逻辑窗口使用。&lt;/p&gt;
+&lt;h3 id=&#34;time-window-实现&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#time-window-实现&#34;&gt;#&lt;/a&gt; Time Window 实现&lt;/h3&gt;
+&lt;p&gt;同样的，我们也可以在  &lt;code&gt;KeyedStream&lt;/code&gt;  上申请 Time Window，其源码如下所示：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;// tumbling time window
+public WindowedStream&amp;lt;T, KEY, TimeWindow&amp;gt; timeWindow(Time size) &amp;#123;
+  if (environment.getStreamTimeCharacteristic() == TimeCharacteristic.ProcessingTime) &amp;#123;
+    return window(TumblingProcessingTimeWindows.of(size));
+  &amp;#125; else &amp;#123;
+    return window(TumblingEventTimeWindows.of(size));
+  &amp;#125;
+&amp;#125;
+// sliding time window
+public WindowedStream&amp;lt;T, KEY, TimeWindow&amp;gt; timeWindow(Time size, Time slide) &amp;#123;
+  if (environment.getStreamTimeCharacteristic() == TimeCharacteristic.ProcessingTime) &amp;#123;
+    return window(SlidingProcessingTimeWindows.of(size, slide));
+  &amp;#125; else &amp;#123;
+    return window(SlidingEventTimeWindows.of(size, slide));
+  &amp;#125;
+&amp;#125;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;在方法体内部会根据当前环境注册的时间类型，使用不同的 WindowAssigner 创建 window。可以看到，EventTime 和 IngestTime 都使用了 &lt;code&gt;XXXEventTimeWindows&lt;/code&gt;  这个 assigner，因为 EventTime 和 IngestTime 在底层的实现上只是在 Source 处为 Record 打时间戳的实现不同，在 window operator 中的处理逻辑是一样的。&lt;/p&gt;
+&lt;p&gt;这里我们主要分析 sliding process time window，如下是相关源码：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;public class SlidingProcessingTimeWindows extends WindowAssigner&amp;lt;Object, TimeWindow&amp;gt; &amp;#123;
+  private static final long serialVersionUID = 1L;
+
+  private final long size;
+
+  private final long slide;
+
+  private SlidingProcessingTimeWindows(long size, long slide) &amp;#123;
+    this.size = size;
+    this.slide = slide;
+  &amp;#125;
+
+  @Override
+  public Collection&amp;lt;TimeWindow&amp;gt; assignWindows(Object element, long timestamp) &amp;#123;
+    timestamp = System.currentTimeMillis();
+    List&amp;lt;TimeWindow&amp;gt; windows = new ArrayList&amp;lt;&amp;gt;((int) (size / slide));
+    // 对齐时间戳
+    long lastStart = timestamp - timestamp % slide;
+    for (long start = lastStart;
+      start &amp;gt; timestamp - size;
+      start -= slide) &amp;#123;
+      // 当前时间戳对应了多个window
+      windows.add(new TimeWindow(start, start + size));
+    &amp;#125;
+    return windows;
+  &amp;#125;
+  ...
+&amp;#125;
+public class ProcessingTimeTrigger extends Trigger&amp;lt;Object, TimeWindow&amp;gt; &amp;#123;
+  @Override
+  // 每个元素进入窗口都会调用该方法
+  public TriggerResult onElement(Object element, long timestamp, TimeWindow window, TriggerContext ctx) &amp;#123;
+    // 注册定时器，当系统时间到达window end timestamp时会回调该trigger的onProcessingTime方法
+    ctx.registerProcessingTimeTimer(window.getEnd());
+    return TriggerResult.CONTINUE;
+  &amp;#125;
+
+  @Override
+  // 返回结果表示执行窗口计算并清空窗口
+  public TriggerResult onProcessingTime(long time, TimeWindow window, TriggerContext ctx) &amp;#123;
+    return TriggerResult.FIRE_AND_PURGE;
+  &amp;#125;
+  ...
+&amp;#125;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;首先， &lt;code&gt;SlidingProcessingTimeWindows&lt;/code&gt;  会对每个进入窗口的元素根据系统时间分配到 &lt;code&gt;(size / slide)&lt;/code&gt;  个不同的窗口，并会在每个窗口上根据窗口结束时间注册一个定时器（相同窗口只会注册一份），当定时器超时时意味着该窗口完成了，这时会回调对应窗口的 Trigger 的 &lt;code&gt;onProcessingTime&lt;/code&gt;  方法，返回 FIRE_AND_PURGE，也就是会执行窗口计算并清空窗口。整个过程示意图如下：&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1iihcKXXXXXavXFXXXXXXXXXX&#34; alt=&#34;img&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;如上图所示横轴代表时间戳（为简化问题，时间戳从 0 开始），第一条 record 会被分配到 [-5,5) 和 [0,10) 两个窗口中，当系统时间到 5 时，就会计算 [-5,5) 窗口中的数据，并将结果发送出去，最后清空窗口中的数据，释放该窗口资源。&lt;/p&gt;
+&lt;h3 id=&#34;session-window-实现&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#session-window-实现&#34;&gt;#&lt;/a&gt; Session Window 实现&lt;/h3&gt;
+&lt;p&gt;Session Window 是一个需求很强烈的窗口机制，但 Session 也比之前的 Window 更复杂。&lt;/p&gt;
+ ]]></description>
+        </item>
+        <item>
             <guid isPermalink="true">https://github.com/Mayizono/miyazono.github.io/big-data/hive/HQL%E7%BB%83%E4%B9%A0%E9%A2%98/</guid>
             <title>HQL练习题</title>
             <link>https://github.com/Mayizono/miyazono.github.io/big-data/hive/HQL%E7%BB%83%E4%B9%A0%E9%A2%98/</link>
@@ -382,325 +701,6 @@
 &lt;p&gt;那么 Flink 为什么要设计这 4 张图呢，其目的是什么呢？Spark 中也有多张图，数据依赖图以及物理执行的 DAG。其目的都是一样的，就是解耦，每张图各司其职，每张图对应了 Job 不同的阶段，更方便做该阶段的事情。我们给出更完整的 Flink Graph 的层次图。&lt;/p&gt;
 &lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1qmtpJVXXXXagXXXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;首先我们看到，JobGraph 之上除了 StreamGraph 还有 OptimizedPlan。OptimizedPlan 是由 Batch API 转换而来的。StreamGraph 是由 Stream API 转换而来的。为什么 API 不直接转换成 JobGraph？因为，Batch 和 Stream 的图结构和优化方法有很大的区别，比如 Batch 有很多执行前的预分析用来优化图的执行，而这种优化并不普适于 Stream，所以通过 OptimizedPlan 来做 Batch 的优化会更方便和清晰，也不会影响 Stream。JobGraph 的责任就是统一 Batch 和 Stream 的图，用来描述清楚一个拓扑图的结构，并且做了 chaining 的优化，chaining 是普适于 Batch 和 Stream 的，所以在这一层做掉。ExecutionGraph 的责任是方便调度和各个 tasks 状态的监控和跟踪，所以 ExecutionGraph 是并行化的 JobGraph。而 “物理执行图” 就是最终分布式在各个机器上运行着的 tasks 了。所以可以看到，这种解耦方式极大地方便了我们在各个层所做的工作，各个层之间是相互隔离的。&lt;/p&gt;
- ]]></description>
-        </item>
-        <item>
-            <guid isPermalink="true">https://github.com/Mayizono/miyazono.github.io/big-data/flink/Flink%E7%9A%84%E5%BC%82%E6%AD%A5IO/</guid>
-            <title>Flink的异步IO</title>
-            <link>https://github.com/Mayizono/miyazono.github.io/big-data/flink/Flink%E7%9A%84%E5%BC%82%E6%AD%A5IO/</link>
-            <category term="大数据" scheme="https://github.com/Mayizono/miyazono.github.io/categories/big-data/" />
-            <category term="Flink" scheme="https://github.com/Mayizono/miyazono.github.io/categories/big-data/flink/" />
-            <pubDate>Mon, 05 Oct 2020 00:00:00 +0800</pubDate>
-            <description><![CDATA[ &lt;h2 id=&#34;背景&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#背景&#34;&gt;#&lt;/a&gt; 背景&lt;/h2&gt;
-&lt;p&gt;Async I/O 是阿里巴巴贡献给社区的一个呼声非常高的特性，于 1.2 版本引入。主要目的是为了解决与外部系统交互时网络延迟成为了系统瓶颈的问题。&lt;/p&gt;
-&lt;p&gt;流计算系统中经常需要与外部系统进行交互，比如需要查询外部数据库以关联上用户的额外信息。通常，我们的实现方式是向数据库发送用户 &lt;code&gt;a&lt;/code&gt;  的查询请求，然后等待结果返回，在这之前，我们无法发送用户 &lt;code&gt;b&lt;/code&gt;  的查询请求。这是一种同步访问的模式，如下图左边所示。&lt;/p&gt;
-&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB11fwcRXXXXXXwXpXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;图中棕色的长条表示等待时间，可以发现网络等待时间极大地阻碍了吞吐和延迟。为了解决同步访问的问题，异步模式可以并发地处理多个请求和回复。也就是说，你可以连续地向数据库发送用户 &lt;code&gt;a&lt;/code&gt; 、 &lt;code&gt;b&lt;/code&gt; 、 &lt;code&gt;c&lt;/code&gt;  等的请求，与此同时，哪个请求的回复先返回了就处理哪个回复，从而连续的请求之间不需要阻塞等待，如上图右边所示。这也正是 Async I/O 的实现原理。&lt;/p&gt;
-&lt;h2 id=&#34;async-io&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#async-io&#34;&gt;#&lt;/a&gt; Async I/O&lt;/h2&gt;
-&lt;p&gt;使用 Async I/O 的前提是需要一个支持异步请求的客户端。当然，没有异步请求客户端的话也可以将同步客户端丢到线程池中执行作为异步客户端。Flink 提供了非常简洁的 API，让用户只需要关注业务逻辑，一些脏活累活比如消息顺序性和一致性保证都由框架处理了，多么棒的事情！&lt;/p&gt;
-&lt;p&gt;使用方式如下方代码片段所示（来自官网文档）：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;/** &#39;AsyncFunction&#39; 的一个实现，向数据库发送异步请求并设置回调 */
-class AsyncDatabaseRequest extends AsyncFunction[String, (String, String)] &amp;#123;
-
-    /** 可以异步请求的特定数据库的客户端 */
-    lazy val client: DatabaseClient = new DatabaseClient(host, post, credentials)
-
-    /** future 的回调的执行上下文（当前线程） */
-    implicit lazy val executor: ExecutionContext = ExecutionContext.fromExecutor(Executors.directExecutor())
-
-    override def asyncInvoke(str: String, asyncCollector: AsyncCollector[(String, String)]): Unit = &amp;#123;
-
-        // 发起一个异步请求，返回结果的 future
-        val resultFuture: Future[String] = client.query(str)
-
-        // 设置请求完成时的回调: 将结果传递给 collector
-        resultFuture.onSuccess &amp;#123;
-            case result: String =&amp;gt; asyncCollector.collect(Iterable((str, result)));
-        &amp;#125;
-    &amp;#125;
-&amp;#125;
-
-// 创建一个原始的流
-val stream: DataStream[String] = ...
-
-// 添加一个 async I/O 的转换
-val resultStream: DataStream[(String, String)] =
-    AsyncDataStream.(un)orderedWait(
-      stream, new AsyncDatabaseRequest(),
-      1000, TimeUnit.MILLISECONDS, // 超时时间
-      100)  // 进行中的异步请求的最大数量
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;code&gt;AsyncDataStream&lt;/code&gt;  有两个静态方法， &lt;code&gt;orderedWait&lt;/code&gt;  和  &lt;code&gt;unorderedWait&lt;/code&gt; ，对应了两种输出模式：有序和无序。&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;有序：消息的发送顺序与接受到的顺序相同（包括 watermark ），也就是先进先出。&lt;/li&gt;
-&lt;li&gt;无序：
-&lt;ul&gt;
-&lt;li&gt;在 ProcessingTime 的情况下，完全无序，先返回的结果先发送。&lt;/li&gt;
-&lt;li&gt;在 EventTime 的情况下，watermark 不能超越消息，消息也不能超越 watermark，也就是说 watermark 定义的顺序的边界。在两个 watermark 之间的消息的发送是无序的，但是在 watermark 之后的消息不能先于该 watermark 之前的消息发送。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;原理实现&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#原理实现&#34;&gt;#&lt;/a&gt; 原理实现&lt;/h2&gt;
-&lt;p&gt;&lt;code&gt;AsyncDataStream.(un)orderedWait&lt;/code&gt;  的主要工作就是创建了一个  &lt;code&gt;AsyncWaitOperator&lt;/code&gt; 。 &lt;code&gt;AsyncWaitOperator&lt;/code&gt;  是支持异步 IO 访问的算子实现，该算子会运行  &lt;code&gt;AsyncFunction&lt;/code&gt;  并处理异步返回的结果，其内部原理如下图所示。&lt;/p&gt;
-&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1tBPQRXXXXXX2aXXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;如图所示， &lt;code&gt;AsyncWaitOperator&lt;/code&gt;  主要由两部分组成： &lt;code&gt;StreamElementQueue&lt;/code&gt;  和  &lt;code&gt;Emitter&lt;/code&gt; 。StreamElementQueue 是一个 Promise 队列，所谓 Promise 是一种异步抽象表示将来会有一个值（参考 &lt;span class=&#34;exturl&#34; data-url=&#34;aHR0cDovL2RvY3Muc2NhbGEtbGFuZy5vcmcvemgtY24vb3ZlcnZpZXdzL2NvcmUvZnV0dXJlcy5odG1sI3Byb21pc2Vz&#34;&gt;Scala Promise&lt;/span&gt; 了解更多），这个队列是未完成的 Promise 队列，也就是进行中的请求队列。Emitter 是一个单独的线程，负责发送消息（收到的异步回复）给下游。&lt;/p&gt;
-&lt;p&gt;图中 &lt;code&gt;E5&lt;/code&gt;  表示进入该算子的第五个元素（”Element-5”），在执行过程中首先会将其包装成一个 “Promise”  &lt;code&gt;P5&lt;/code&gt; ，然后将 &lt;code&gt;P5&lt;/code&gt;  放入队列。最后调用  &lt;code&gt;AsyncFunction&lt;/code&gt;  的  &lt;code&gt;ayncInvoke&lt;/code&gt;  方法，该方法会向外部服务发起一个异步的请求，并注册回调。该回调会在异步请求成功返回时调用  &lt;code&gt;AsyncCollector.collect&lt;/code&gt;  方法将返回的结果交给框架处理。实际上  &lt;code&gt;AsyncCollector&lt;/code&gt;  是一个 Promise ，也就是  &lt;code&gt;P5&lt;/code&gt; ，在调用  &lt;code&gt;collect&lt;/code&gt;  的时候会标记 Promise 为完成状态，并通知 Emitter 线程有完成的消息可以发送了。Emitter 就会从队列中拉取完成的 Promise ，并从 Promise 中取出消息发送给下游。&lt;/p&gt;
-&lt;h3 id=&#34;消息的顺序性&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#消息的顺序性&#34;&gt;#&lt;/a&gt; 消息的顺序性&lt;/h3&gt;
-&lt;p&gt;上文提到 Async I/O 提供了两种输出模式。其实细分有三种模式：有序，ProcessingTime 无序，EventTime 无序。Flink 使用队列来实现不同的输出模式，并抽象出一个队列的接口（ &lt;code&gt;StreamElementQueue&lt;/code&gt; ），这种分层设计使得 &lt;code&gt;AsyncWaitOperator&lt;/code&gt;  和 &lt;code&gt;Emitter&lt;/code&gt;  不用关心消息的顺序问题。 &lt;code&gt;StreamElementQueue&lt;/code&gt;  有两种具体实现，分别是  &lt;code&gt;OrderedStreamElementQueue&lt;/code&gt;  和  &lt;code&gt;UnorderedStreamElementQueue&lt;/code&gt; 。 &lt;code&gt;UnorderedStreamElementQueue&lt;/code&gt;  比较有意思，它使用了一套逻辑巧妙地实现完全无序和 EventTime 无序。&lt;/p&gt;
-&lt;h4 id=&#34;有序&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#有序&#34;&gt;#&lt;/a&gt; 有序&lt;/h4&gt;
-&lt;p&gt;有序比较简单，使用一个队列就能实现。所有新进入该算子的元素（包括 watermark），都会包装成 Promise 并按到达顺序放入该队列。如下图所示，尽管 &lt;code&gt;P4&lt;/code&gt;  的结果先返回，但并不会发送，只有  &lt;code&gt;P1&lt;/code&gt;  （队首）的结果返回了才会触发 Emitter 拉取队首元素进行发送。&lt;/p&gt;
-&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB16DYTRXXXXXbWXVXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
-&lt;h4 id=&#34;processingtime-无序&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#processingtime-无序&#34;&gt;#&lt;/a&gt; ProcessingTime 无序&lt;/h4&gt;
-&lt;p&gt;ProcessingTime 无序也比较简单，因为没有 watermark，不需要协调 watermark 与消息的顺序性，所以使用两个队列就能实现，一个  &lt;code&gt;uncompletedQueue&lt;/code&gt;  一个  &lt;code&gt;completedQueue&lt;/code&gt; 。所有新进入该算子的元素，同样的包装成 Promise 并放入  &lt;code&gt;uncompletedQueue&lt;/code&gt;  队列，当 &lt;code&gt;uncompletedQueue&lt;/code&gt;  队列中任意的 Promise 返回了数据，则将该 Promise 移到  &lt;code&gt;completedQueue&lt;/code&gt;  队列中，并通知 Emitter 消费。如下图所示：&lt;/p&gt;
-&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1zzsnRXXXXXbNXXXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
-&lt;h4 id=&#34;eventtime-无序&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#eventtime-无序&#34;&gt;#&lt;/a&gt; EventTime 无序&lt;/h4&gt;
-&lt;p&gt;EventTime 无序类似于有序与 ProcessingTime 无序的结合体。因为有 watermark，需要协调 watermark 与消息之间的顺序性，所以 &lt;code&gt;uncompletedQueue&lt;/code&gt;  中存放的元素从原先的 Promise 变成了 Promise 集合。如果进入算子的是消息元素，则会包装成 Promise 放入队尾的集合中。如果进入算子的是 watermark，也会包装成 Promise 并放到一个独立的集合中，再将该集合加入到  &lt;code&gt;uncompletedQueue&lt;/code&gt;  队尾，最后再创建一个空集合加到  &lt;code&gt;uncompletedQueue&lt;/code&gt;  队尾。这样，watermark 就成了消息顺序的边界。只有处在队首的集合中的 Promise 返回了数据，才能将该 Promise 移到  &lt;code&gt;completedQueue&lt;/code&gt;  队列中，由 Emitter 消费发往下游。只有队首集合空了，才能处理第二个集合。这样就保证了当且仅当某个 watermark 之前所有的消息都已经被发送了，该 watermark 才能被发送。过程如下图所示：&lt;/p&gt;
-&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1TnrsRXXXXXaKaVXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
-&lt;h3 id=&#34;快照与恢复&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#快照与恢复&#34;&gt;#&lt;/a&gt; 快照与恢复&lt;/h3&gt;
-&lt;p&gt;分布式快照机制是为了保证状态的一致性。我们需要分析哪些状态是需要快照的，哪些是不需要的。首先，已经完成回调并且已经发往下游的元素是不需要快照的。否则，会导致重发，那就不是 exactly-once 了。而已经完成回调且未发往下游的元素，加上未完成回调的元素，就是上述队列中的所有元素。&lt;/p&gt;
-&lt;p&gt;所以快照的逻辑也非常简单，(1) 清空原有的状态存储，(2) 遍历队列中的所有 Promise，从中取出  &lt;code&gt;StreamElement&lt;/code&gt; （消息或 watermark）并放入状态存储中，(3) 执行快照操作。&lt;/p&gt;
-&lt;p&gt;恢复的时候，从快照中读取所有的元素全部再处理一次，当然包括之前已完成回调的元素。所以在失败恢复后，会有元素重复请求外部服务，但是每个回调的结果只会被发往下游一次。&lt;/p&gt;
- ]]></description>
-        </item>
-        <item>
-            <guid isPermalink="true">https://github.com/Mayizono/miyazono.github.io/big-data/flink/Flink%E7%AE%A1%E7%90%86Kafka%E7%9A%84%E6%B6%88%E8%B4%B9%E4%BD%8D%E7%82%B9/</guid>
-            <title>Flink管理 Kafka 消费位点</title>
-            <link>https://github.com/Mayizono/miyazono.github.io/big-data/flink/Flink%E7%AE%A1%E7%90%86Kafka%E7%9A%84%E6%B6%88%E8%B4%B9%E4%BD%8D%E7%82%B9/</link>
-            <category term="大数据" scheme="https://github.com/Mayizono/miyazono.github.io/categories/big-data/" />
-            <category term="Flink" scheme="https://github.com/Mayizono/miyazono.github.io/categories/big-data/flink/" />
-            <pubDate>Mon, 05 Oct 2020 00:00:00 +0800</pubDate>
-            <description><![CDATA[ &lt;p&gt;检查点（Checkpoint）是使 Apache Flink 能从故障恢复的一种内部机制。检查点是 Flink 应用状态的一个一致性副本，包括了输入的读取位点。在发生故障时，Flink 通过从检查点加载应用程序状态来恢复，并从恢复的读取位点继续处理，就好像什么事情都没发生一样。你可以把检查点想象成电脑游戏的存档一样。如果你在游戏中发生了什么事情，你可以随时读档重来一次。&lt;/p&gt;
-&lt;p&gt;检查点使得 Apache Flink 具有容错能力，并确保了即时发生故障也能保证流应用程序的语义。检查点是以固定的间隔来触发的，该间隔可以在应用中配置。&lt;/p&gt;
-&lt;p&gt;Apache Flink 中实现的 Kafka 消费者是一个有状态的算子（operator），它集成了 Flink 的检查点机制，它的状态是所有 Kafka 分区的读取偏移量。当一个检查点被触发时，每一个分区的偏移量都被存到了这个检查点中。Flink 的检查点机制保证了所有 operator task 的存储状态都是一致的。这里的 “一致的” 是什么意思呢？意思是它们存储的状态都是&lt;strong&gt;基于相同的输入数据&lt;/strong&gt;。当所有的 operator task 成功存储了它们的状态，一个检查点才算完成。因此，当从潜在的系统故障中恢复时，系统提供了 excatly-once 的状态更新语义。&lt;/p&gt;
-&lt;p&gt;下面我们将一步步地介绍 Apache Flink 中的 Kafka 消费位点是如何做检查点的。在本文的例子中，数据被存在了 Flink 的 JobMaster 中。值得注意的是，在 POC 或生产用例下，这些数据最好是能存到一个外部文件系统（如 HDFS 或 S3）中。&lt;/p&gt;
-&lt;h3 id=&#34;第一步&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#第一步&#34;&gt;#&lt;/a&gt; 第一步：&lt;/h3&gt;
-&lt;p&gt;如下所示，一个 Kafka topic，有两个 partition，每个 partition 都含有 “A”, “B”, “C”, ”D”, “E” 5 条消息。我们将两个 partition 的偏移量（offset）都设置为 0.&lt;/p&gt;
-&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1QQ91nhTpK1RjSZR0XXbEwXXa-842-415.png&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
-&lt;h3 id=&#34;第二步&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#第二步&#34;&gt;#&lt;/a&gt; 第二步：&lt;/h3&gt;
-&lt;p&gt;Kafka comsumer（消费者）开始从 partition 0 读取消息。消息 “A” 正在被处理，第一个 consumer 的 offset 变成了 1。&lt;/p&gt;
-&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1jBS2nb2pK1RjSZFsXXaNlXXa-842-420.png&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
-&lt;h3 id=&#34;第三步&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#第三步&#34;&gt;#&lt;/a&gt; 第三步：&lt;/h3&gt;
-&lt;p&gt;消息 “A” 到达了 Flink Map Task。两个 consumer 都开始读取他们下一条消息（partition 0 读取 “B”，partition 1 读取 “A”）。各自将 offset 更新成 2 和 1 。同时，Flink 的 JobMaster 开始在 source 触发了一个检查点。&lt;/p&gt;
-&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1ZNS8nkvoK1RjSZFNXXcxMVXa-842-423.png&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
-&lt;h3 id=&#34;第四步&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#第四步&#34;&gt;#&lt;/a&gt; 第四步：&lt;/h3&gt;
-&lt;p&gt;接下来，由于 source 触发了检查点，Kafka consumer 创建了它们状态的第一个快照（”offset = 2, 1”），并将快照存到了 Flink 的 JobMaster 中。Source 在消息 “B” 和 “A” 从 partition 0 和 1 发出后，发了一个 checkpoint barrier。Checkopint barrier 用于各个 operator task 之间对齐检查点，保证了整个检查点的一致性。消息 “A” 到达了 Flink Map Task，而上面的 consumer 继续读取下一条消息（消息 “C”）。&lt;/p&gt;
-&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1o4TbnkzoK1RjSZFlXXai4VXa-842-447.png&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
-&lt;h3 id=&#34;第五步&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#第五步&#34;&gt;#&lt;/a&gt; 第五步：&lt;/h3&gt;
-&lt;p&gt;Flink Map Task 收齐了同一版本的全部 checkpoint barrier 后，那么就会将它自己的状态也存储到 JobMaster。同时，consumer 会继续从 Kafka 读取消息。&lt;/p&gt;
-&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1EI2XngHqK1RjSZFkXXX.WFXa-842-439.png&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
-&lt;h3 id=&#34;第六步&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#第六步&#34;&gt;#&lt;/a&gt; 第六步：&lt;/h3&gt;
-&lt;p&gt;Flink Map Task 完成了它自己状态的快照流程后，会向 Flink JobMaster 汇报它已经完成了这个 checkpoint。当所有的 task 都报告完成了它们的状态 checkpoint 后，JobMaster 就会将这个 checkpoint 标记为成功。从此刻开始，这个 checkpoint 就可以用于故障恢复了。值得一提的是，Flink 并不依赖 Kafka offset 从系统故障中恢复。&lt;/p&gt;
-&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1huHtnhnaK1RjSZFBXXcW7VXa-842-417.png&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
-&lt;h3 id=&#34;故障恢复&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#故障恢复&#34;&gt;#&lt;/a&gt; 故障恢复&lt;/h3&gt;
-&lt;p&gt;在发生故障时（比如，某个 worker 挂了），所有的 operator task 会被重启，而他们的状态会被重置到最近一次成功的 checkpoint。Kafka source 分别从 offset 2 和 1 重新开始读取消息（因为这是完成的 checkpoint 中存的 offset）。当作业重启后，我们可以期待正常的系统操作，就好像之前没有发生故障一样。如下图所示：&lt;/p&gt;
-&lt;p&gt;&lt;img data-src=&#34;https://img.alicdn.com/tfs/TB1o8zXnmzqK1RjSZFjXXblCFXa-842-411.png&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
- ]]></description>
-        </item>
-        <item>
-            <guid isPermalink="true">https://github.com/Mayizono/miyazono.github.io/big-data/flink/Flink%E7%9A%84Window%E6%9C%BA%E5%88%B6/</guid>
-            <title>Flink的窗口机制</title>
-            <link>https://github.com/Mayizono/miyazono.github.io/big-data/flink/Flink%E7%9A%84Window%E6%9C%BA%E5%88%B6/</link>
-            <category term="大数据" scheme="https://github.com/Mayizono/miyazono.github.io/categories/big-data/" />
-            <category term="Flink" scheme="https://github.com/Mayizono/miyazono.github.io/categories/big-data/flink/" />
-            <pubDate>Wed, 30 Sep 2020 00:00:00 +0800</pubDate>
-            <description><![CDATA[ &lt;p&gt;Flink 认为 Batch 是 Streaming 的一个特例，所以 Flink 底层引擎是一个流式引擎，在上面实现了流处理和批处理。而窗口（window）就是从 Streaming 到 Batch 的一个桥梁。Flink 提供了非常完善的窗口机制，这是我认为的 Flink 最大的亮点之一（其他的亮点包括消息乱序处理，和 checkpoint 机制）。这里介绍流式处理中的窗口概念，介绍 Flink 内建的一些窗口和 Window API，最后讨论下窗口在底层是如何实现的。&lt;/p&gt;
-&lt;h2 id=&#34;什么是-window&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#什么是-window&#34;&gt;#&lt;/a&gt; 什么是 Window&lt;/h2&gt;
-&lt;p&gt;在流处理应用中，数据是连续不断的，因此我们不可能等到所有数据都到了才开始处理。当然我们可以每来一个消息就处理一次，但是有时我们需要做一些聚合类的处理，例如：在过去的 1 分钟内有多少用户点击了我们的网页。在这种情况下，我们必须定义一个窗口，用来收集最近一分钟内的数据，并对这个窗口内的数据进行计算。&lt;/p&gt;
-&lt;p&gt;窗口可以是时间驱动的（Time Window，例如：每 30 秒钟），也可以是数据驱动的（Count Window，例如：每一百个元素）。一种经典的窗口分类可以分成：翻滚窗口（Tumbling Window，无重叠），滚动窗口（Sliding Window，有重叠），和会话窗口（Session Window，活动间隙）。&lt;/p&gt;
-&lt;p&gt;我们举个具体的场景来形象地理解不同窗口的概念。假设，淘宝网会记录每个用户每次购买的商品个数，我们要做的是统计不同窗口中用户购买商品的总数。下图给出了几种经典的窗口切分概述图：&lt;/p&gt;
-&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1bwsTJVXXXXaBaXXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;上图中，raw data stream 代表用户的购买行为流，圈中的数字代表该用户本次购买的商品个数，事件是按时间分布的，所以可以看出事件之间是有 time gap 的。Flink 提供了上图中所有的窗口类型，下面我们会逐一进行介绍。&lt;/p&gt;
-&lt;h3 id=&#34;time-window&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#time-window&#34;&gt;#&lt;/a&gt; Time Window&lt;/h3&gt;
-&lt;p&gt;就如名字所说的，Time Window 是根据时间对数据流进行分组的。这里我们涉及到了流处理中的时间问题，时间问题和消息乱序问题是紧密关联的，这是流处理中现存的难题之一，我们将在后续的 &lt;span class=&#34;exturl&#34; data-url=&#34;aHR0cDovL3d1Y2hvbmcubWUvYmxvZy8yMDE2LzA1LzI1L2ZsaW5rLWludGVybmFscy13aW5kb3ctbWVjaGFuaXNtLyM=&#34;&gt;EventTime 和消息乱序处理&lt;/span&gt;中对这部分问题进行深入探讨。这里我们只需要知道 Flink 提出了三种时间的概念，分别是 event time（事件时间：事件发生时的时间），ingestion time（摄取时间：事件进入流处理系统的时间），processing time（处理时间：消息被计算处理的时间）。Flink 中窗口机制和时间类型是完全解耦的，也就是说当需要改变时间类型时不需要更改窗口逻辑相关的代码。&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;strong&gt;Tumbling Time Window&lt;/strong&gt;&lt;br /&gt;
- 如上图，我们需要统计每一分钟中用户购买的商品的总数，需要将用户的行为事件按每一分钟进行切分，这种切分被成为翻滚时间窗口（Tumbling Time Window）。翻滚窗口能将数据流切分成不重叠的窗口，每一个事件只能属于一个窗口。通过使用 DataStream API，我们可以这样实现：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;// Stream of (userId, buyCnt)
-val buyCnts: DataStream[(Int, Int)] = ...
-
-val tumblingCnts: DataStream[(Int, Int)] = buyCnts
-  // key stream by userId
-  .keyBy(0) 
-  // tumbling time window of 1 minute length
-  .timeWindow(Time.minutes(1))
-  // compute sum over buyCnt
-  .sum(1)
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;strong&gt;Sliding Time Window&lt;/strong&gt;&lt;br /&gt;
- 但是对于某些应用，它们需要的窗口是不间断的，需要平滑地进行窗口聚合。比如，我们可以每 30 秒计算一次最近一分钟用户购买的商品总数。这种窗口我们称为滑动时间窗口（Sliding Time Window）。在滑窗中，一个元素可以对应多个窗口。通过使用 DataStream API，我们可以这样实现：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;val slidingCnts: DataStream[(Int, Int)] = buyCnts
-  .keyBy(0) 
-  // sliding time window of 1 minute length and 30 secs trigger interval
-  .timeWindow(Time.minutes(1), Time.seconds(30))
-  .sum(1)
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id=&#34;count-window&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#count-window&#34;&gt;#&lt;/a&gt; Count Window&lt;/h3&gt;
-&lt;p&gt;Count Window 是根据元素个数对数据流进行分组的。&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;strong&gt;Tumbling Count Window&lt;/strong&gt;&lt;br /&gt;
- 当我们想要每 100 个用户购买行为事件统计购买总数，那么每当窗口中填满 100 个元素了，就会对窗口进行计算，这种窗口我们称之为翻滚计数窗口（Tumbling Count Window），上图所示窗口大小为 3 个。通过使用 DataStream API，我们可以这样实现：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;// Stream of (userId, buyCnts)
-val buyCnts: DataStream[(Int, Int)] = ...
-
-val tumblingCnts: DataStream[(Int, Int)] = buyCnts
-  // key stream by sensorId
-  .keyBy(0)
-  // tumbling count window of 100 elements size
-  .countWindow(100)
-  // compute the buyCnt sum 
-  .sum(1)
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;strong&gt;Sliding Count Window&lt;/strong&gt;&lt;br /&gt;
- 当然 Count Window 也支持 Sliding Window，虽在上图中未描述出来，但和 Sliding Time Window 含义是类似的，例如计算每 10 个元素计算一次最近 100 个元素的总和，代码示例如下。&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;val slidingCnts: DataStream[(Int, Int)] = vehicleCnts
-  .keyBy(0)
-  // sliding count window of 100 elements size and 10 elements trigger interval
-  .countWindow(100, 10)
-  .sum(1)
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id=&#34;session-window&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#session-window&#34;&gt;#&lt;/a&gt; Session Window&lt;/h3&gt;
-&lt;p&gt;在这种用户交互事件流中，我们首先想到的是将事件聚合到会话窗口中（一段用户持续活跃的周期），由非活跃的间隙分隔开。如上图所示，就是需要计算每个用户在活跃期间总共购买的商品数量，如果用户 30 秒没有活动则视为会话断开（假设 raw data stream 是单个用户的购买行为流）。Session Window 的示例代码如下：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;// Stream of (userId, buyCnts)
-val buyCnts: DataStream[(Int, Int)] = ...
-  
-val sessionCnts: DataStream[(Int, Int)] = vehicleCnts
-  .keyBy(0)
-  // session window based on a 30 seconds session gap interval 
-  .window(ProcessingTimeSessionWindows.withGap(Time.seconds(30)))
-  .sum(1)
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;一般而言，window 是在无限的流上定义了一个有限的元素集合。这个集合可以是基于时间的，元素个数的，时间和个数结合的，会话间隙的，或者是自定义的。Flink 的 DataStream API 提供了简洁的算子来满足常用的窗口操作，同时提供了通用的窗口机制来允许用户自己定义窗口分配逻辑。下面我们会对 Flink 窗口相关的 API 进行剖析。&lt;/p&gt;
-&lt;h2 id=&#34;剖析-window-api&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#剖析-window-api&#34;&gt;#&lt;/a&gt; 剖析 Window API&lt;/h2&gt;
-&lt;p&gt;得益于 Flink Window API 松耦合设计，我们可以非常灵活地定义符合特定业务的窗口。Flink 中定义一个窗口主要需要以下三个组件。&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;**Window Assigner：** 用来决定某个元素被分配到哪个 / 哪些窗口中去。&lt;/p&gt;
-&lt;p&gt;如下类图展示了目前内置实现的 Window Assigners：&lt;br /&gt;
-&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1plkxJVXXXXXqXpXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;**Trigger：** 触发器。决定了一个窗口何时能够被计算或清除，每个窗口都会拥有一个自己的 Trigger。&lt;/p&gt;
-&lt;p&gt;如下类图展示了目前内置实现的 Triggers：&lt;br /&gt;
-&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB15yMeJVXXXXbbXFXXXXXXXXXX&#34; alt=&#34;img&#34; /&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;**Evictor：** 可以译为 “驱逐者”。在 Trigger 触发之后，在窗口被处理之前，Evictor（如果有 Evictor 的话）会用来剔除窗口中不需要的元素，相当于一个 filter。&lt;/p&gt;
-&lt;p&gt;如下类图展示了目前内置实现的 Evictors：&lt;br /&gt;
-&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1OCT6JVXXXXcjXVXXXXXXXXXX&#34; alt=&#34;img&#34; /&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;上述三个组件的不同实现的不同组合，可以定义出非常复杂的窗口。Flink 中内置的窗口也都是基于这三个组件构成的，当然内置窗口有时候无法解决用户特殊的需求，所以 Flink 也暴露了这些窗口机制的内部接口供用户实现自定义的窗口。下面我们将基于这三者探讨窗口的实现机制。&lt;/p&gt;
-&lt;h2 id=&#34;window-的实现&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#window-的实现&#34;&gt;#&lt;/a&gt; Window 的实现&lt;/h2&gt;
-&lt;p&gt;下图描述了 Flink 的窗口机制以及各组件之间是如何相互工作的。&lt;/p&gt;
-&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1swNgKXXXXXc4XpXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;首先上图中的组件都位于一个算子（window operator）中，数据流源源不断地进入算子，每一个到达的元素都会被交给 WindowAssigner。WindowAssigner 会决定元素被放到哪个或哪些窗口（window），可能会创建新窗口。因为一个元素可以被放入多个窗口中，所以同时存在多个窗口是可能的。注意， &lt;code&gt;Window&lt;/code&gt;  本身只是一个 ID 标识符，其内部可能存储了一些元数据，如 &lt;code&gt;TimeWindow&lt;/code&gt;  中有开始和结束时间，但是并不会存储窗口中的元素。窗口中的元素实际存储在 Key/Value State 中，key 为 &lt;code&gt;Window&lt;/code&gt; ，value 为元素集合（或聚合值）。为了保证窗口的容错性，该实现依赖了 Flink 的 State 机制。&lt;/p&gt;
-&lt;p&gt;每一个窗口都拥有一个属于自己的 Trigger，Trigger 上会有定时器，用来决定一个窗口何时能够被计算或清除。每当有元素加入到该窗口，或者之前注册的定时器超时了，那么 Trigger 都会被调用。Trigger 的返回结果可以是 continue（不做任何操作），fire（处理窗口数据），purge（移除窗口和窗口中的数据），或者 fire + purge。一个 Trigger 的调用结果只是 fire 的话，那么会计算窗口并保留窗口原样，也就是说窗口中的数据仍然保留不变，等待下次 Trigger fire 的时候再次执行计算。一个窗口可以被重复计算多次知道它被 purge 了。在 purge 之前，窗口会一直占用着内存。&lt;/p&gt;
-&lt;p&gt;当 Trigger fire 了，窗口中的元素集合就会交给 &lt;code&gt;Evictor&lt;/code&gt; （如果指定了的话）。Evictor 主要用来遍历窗口中的元素列表，并决定最先进入窗口的多少个元素需要被移除。剩余的元素会交给用户指定的函数进行窗口的计算。如果没有 Evictor 的话，窗口中的所有元素会一起交给函数进行计算。&lt;/p&gt;
-&lt;p&gt;计算函数收到了窗口的元素（可能经过了 Evictor 的过滤），并计算出窗口的结果值，并发送给下游。窗口的结果值可以是一个也可以是多个。DataStream API 上可以接收不同类型的计算函数，包括预定义的 &lt;code&gt;sum()&lt;/code&gt; , &lt;code&gt;min()&lt;/code&gt; , &lt;code&gt;max()&lt;/code&gt; ，还有  &lt;code&gt;ReduceFunction&lt;/code&gt; ， &lt;code&gt;FoldFunction&lt;/code&gt; ，还有 &lt;code&gt;WindowFunction&lt;/code&gt; 。WindowFunction 是最通用的计算函数，其他的预定义的函数基本都是基于该函数实现的。&lt;/p&gt;
-&lt;p&gt;Flink 对于一些聚合类的窗口计算（如 sum,min）做了优化，因为聚合类的计算不需要将窗口中的所有数据都保存下来，只需要保存一个 result 值就可以了。每个进入窗口的元素都会执行一次聚合函数并修改 result 值。这样可以大大降低内存的消耗并提升性能。但是如果用户定义了 Evictor，则不会启用对聚合窗口的优化，因为 Evictor 需要遍历窗口中的所有元素，必须要将窗口中所有元素都存下来。&lt;/p&gt;
-&lt;h2 id=&#34;源码分析&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#源码分析&#34;&gt;#&lt;/a&gt; 源码分析&lt;/h2&gt;
-&lt;p&gt;上述的三个组件构成了 Flink 的窗口机制。为了更清楚地描述窗口机制，以及解开一些疑惑（比如 purge 和 Evictor 的区别和用途），我们将一步步地解释 Flink 内置的一些窗口（Time Window，Count Window，Session Window）是如何实现的。&lt;/p&gt;
-&lt;h3 id=&#34;count-window-实现&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#count-window-实现&#34;&gt;#&lt;/a&gt; Count Window 实现&lt;/h3&gt;
-&lt;p&gt;Count Window 是使用三组件的典范，我们可以在  &lt;code&gt;KeyedStream&lt;/code&gt;  上创建 Count Window，其源码如下所示：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;// tumbling count window
-public WindowedStream&amp;lt;T, KEY, GlobalWindow&amp;gt; countWindow(long size) &amp;#123;
-  return window(GlobalWindows.create())  // create window stream using GlobalWindows
-      .trigger(PurgingTrigger.of(CountTrigger.of(size))); // trigger is window size
-&amp;#125;
-// sliding count window
-public WindowedStream&amp;lt;T, KEY, GlobalWindow&amp;gt; countWindow(long size, long slide) &amp;#123;
-  return window(GlobalWindows.create())
-    .evictor(CountEvictor.of(size))  // evictor is window size
-    .trigger(CountTrigger.of(slide)); // trigger is slide size
-&amp;#125;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;第一个函数是申请翻滚计数窗口，参数为窗口大小。第二个函数是申请滑动计数窗口，参数分别为窗口大小和滑动大小。它们都是基于  &lt;code&gt;GlobalWindows&lt;/code&gt;  这个 WindowAssigner 来创建的窗口，该 assigner 会将所有元素都分配到同一个 global window 中，所有 &lt;code&gt;GlobalWindows&lt;/code&gt;  的返回值一直是  &lt;code&gt;GlobalWindow&lt;/code&gt;  单例。基本上自定义的窗口都会基于该 assigner 实现。&lt;/p&gt;
-&lt;p&gt;翻滚计数窗口并不带 evictor，只注册了一个 trigger。该 trigger 是带 purge 功能的 CountTrigger。也就是说每当窗口中的元素数量达到了 window-size，trigger 就会返回 fire+purge，窗口就会执行计算并清空窗口中的所有元素，再接着储备新的元素。从而实现了 tumbling 的窗口之间无重叠。&lt;/p&gt;
-&lt;p&gt;滑动计数窗口的各窗口之间是有重叠的，但我们用的 GlobalWindows assinger 从始至终只有一个窗口，不像 sliding time assigner 可以同时存在多个窗口。所以 trigger 结果不能带 purge，也就是说计算完窗口后窗口中的数据要保留下来（供下个滑窗使用）。另外，trigger 的间隔是 slide-size，evictor 的保留的元素个数是 window-size。也就是说，每个滑动间隔就触发一次窗口计算，并保留下最新进入窗口的 window-size 个元素，剔除旧元素。&lt;/p&gt;
-&lt;p&gt;假设有一个滑动计数窗口，每 2 个元素计算一次最近 4 个元素的总和，那么窗口工作示意图如下所示：&lt;/p&gt;
-&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB15vcUJVXXXXcGXVXXXXXXXXXX&#34; alt=&#34;img&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;图中所示的各个窗口逻辑上是不同的窗口，但在物理上是同一个窗口。该滑动计数窗口，trigger 的触发条件是元素个数达到 2 个（每进入2 个元素就会触发一次），evictor 保留的元素个数是 4 个，每次计算完窗口总和后会保留剩余的元素。所以第一次触发 trigger 是当元素 5 进入，第三次触发 trigger 是当元素 2 进入，并驱逐 5 和 2，计算剩余的 4 个元素的总和（22）并发送出去，保留下 2,4,9,7 元素供下个逻辑窗口使用。&lt;/p&gt;
-&lt;h3 id=&#34;time-window-实现&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#time-window-实现&#34;&gt;#&lt;/a&gt; Time Window 实现&lt;/h3&gt;
-&lt;p&gt;同样的，我们也可以在  &lt;code&gt;KeyedStream&lt;/code&gt;  上申请 Time Window，其源码如下所示：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;// tumbling time window
-public WindowedStream&amp;lt;T, KEY, TimeWindow&amp;gt; timeWindow(Time size) &amp;#123;
-  if (environment.getStreamTimeCharacteristic() == TimeCharacteristic.ProcessingTime) &amp;#123;
-    return window(TumblingProcessingTimeWindows.of(size));
-  &amp;#125; else &amp;#123;
-    return window(TumblingEventTimeWindows.of(size));
-  &amp;#125;
-&amp;#125;
-// sliding time window
-public WindowedStream&amp;lt;T, KEY, TimeWindow&amp;gt; timeWindow(Time size, Time slide) &amp;#123;
-  if (environment.getStreamTimeCharacteristic() == TimeCharacteristic.ProcessingTime) &amp;#123;
-    return window(SlidingProcessingTimeWindows.of(size, slide));
-  &amp;#125; else &amp;#123;
-    return window(SlidingEventTimeWindows.of(size, slide));
-  &amp;#125;
-&amp;#125;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;在方法体内部会根据当前环境注册的时间类型，使用不同的 WindowAssigner 创建 window。可以看到，EventTime 和 IngestTime 都使用了 &lt;code&gt;XXXEventTimeWindows&lt;/code&gt;  这个 assigner，因为 EventTime 和 IngestTime 在底层的实现上只是在 Source 处为 Record 打时间戳的实现不同，在 window operator 中的处理逻辑是一样的。&lt;/p&gt;
-&lt;p&gt;这里我们主要分析 sliding process time window，如下是相关源码：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;public class SlidingProcessingTimeWindows extends WindowAssigner&amp;lt;Object, TimeWindow&amp;gt; &amp;#123;
-  private static final long serialVersionUID = 1L;
-
-  private final long size;
-
-  private final long slide;
-
-  private SlidingProcessingTimeWindows(long size, long slide) &amp;#123;
-    this.size = size;
-    this.slide = slide;
-  &amp;#125;
-
-  @Override
-  public Collection&amp;lt;TimeWindow&amp;gt; assignWindows(Object element, long timestamp) &amp;#123;
-    timestamp = System.currentTimeMillis();
-    List&amp;lt;TimeWindow&amp;gt; windows = new ArrayList&amp;lt;&amp;gt;((int) (size / slide));
-    // 对齐时间戳
-    long lastStart = timestamp - timestamp % slide;
-    for (long start = lastStart;
-      start &amp;gt; timestamp - size;
-      start -= slide) &amp;#123;
-      // 当前时间戳对应了多个window
-      windows.add(new TimeWindow(start, start + size));
-    &amp;#125;
-    return windows;
-  &amp;#125;
-  ...
-&amp;#125;
-public class ProcessingTimeTrigger extends Trigger&amp;lt;Object, TimeWindow&amp;gt; &amp;#123;
-  @Override
-  // 每个元素进入窗口都会调用该方法
-  public TriggerResult onElement(Object element, long timestamp, TimeWindow window, TriggerContext ctx) &amp;#123;
-    // 注册定时器，当系统时间到达window end timestamp时会回调该trigger的onProcessingTime方法
-    ctx.registerProcessingTimeTimer(window.getEnd());
-    return TriggerResult.CONTINUE;
-  &amp;#125;
-
-  @Override
-  // 返回结果表示执行窗口计算并清空窗口
-  public TriggerResult onProcessingTime(long time, TimeWindow window, TriggerContext ctx) &amp;#123;
-    return TriggerResult.FIRE_AND_PURGE;
-  &amp;#125;
-  ...
-&amp;#125;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;首先， &lt;code&gt;SlidingProcessingTimeWindows&lt;/code&gt;  会对每个进入窗口的元素根据系统时间分配到 &lt;code&gt;(size / slide)&lt;/code&gt;  个不同的窗口，并会在每个窗口上根据窗口结束时间注册一个定时器（相同窗口只会注册一份），当定时器超时时意味着该窗口完成了，这时会回调对应窗口的 Trigger 的 &lt;code&gt;onProcessingTime&lt;/code&gt;  方法，返回 FIRE_AND_PURGE，也就是会执行窗口计算并清空窗口。整个过程示意图如下：&lt;/p&gt;
-&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1iihcKXXXXXavXFXXXXXXXXXX&#34; alt=&#34;img&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;如上图所示横轴代表时间戳（为简化问题，时间戳从 0 开始），第一条 record 会被分配到 [-5,5) 和 [0,10) 两个窗口中，当系统时间到 5 时，就会计算 [-5,5) 窗口中的数据，并将结果发送出去，最后清空窗口中的数据，释放该窗口资源。&lt;/p&gt;
-&lt;h3 id=&#34;session-window-实现&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#session-window-实现&#34;&gt;#&lt;/a&gt; Session Window 实现&lt;/h3&gt;
-&lt;p&gt;Session Window 是一个需求很强烈的窗口机制，但 Session 也比之前的 Window 更复杂。&lt;/p&gt;
  ]]></description>
         </item>
         <item>
