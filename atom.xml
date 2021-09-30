@@ -258,6 +258,286 @@
         <updated>2020-10-09T16:00:00.000Z</updated>
     </entry>
     <entry>
+        <id>https://github.com/Mayizono/miyazono.github.io/big-data/flink/Flink%E7%9A%84%E5%BC%82%E6%AD%A5IO%20-%20%E5%89%AF%E6%9C%AC/</id>
+        <title>Flink的架构</title>
+        <link rel="alternate" href="https://github.com/Mayizono/miyazono.github.io/big-data/flink/Flink%E7%9A%84%E5%BC%82%E6%AD%A5IO%20-%20%E5%89%AF%E6%9C%AC/"/>
+        <content type="html">&lt;h2 id=&#34;背景&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#背景&#34;&gt;#&lt;/a&gt; 背景&lt;/h2&gt;
+&lt;p&gt;Async I/O 是阿里巴巴贡献给社区的一个呼声非常高的特性，于 1.2 版本引入。主要目的是为了解决与外部系统交互时网络延迟成为了系统瓶颈的问题。&lt;/p&gt;
+&lt;p&gt;流计算系统中经常需要与外部系统进行交互，比如需要查询外部数据库以关联上用户的额外信息。通常，我们的实现方式是向数据库发送用户 &lt;code&gt;a&lt;/code&gt;  的查询请求，然后等待结果返回，在这之前，我们无法发送用户 &lt;code&gt;b&lt;/code&gt;  的查询请求。这是一种同步访问的模式，如下图左边所示。&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB11fwcRXXXXXXwXpXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;图中棕色的长条表示等待时间，可以发现网络等待时间极大地阻碍了吞吐和延迟。为了解决同步访问的问题，异步模式可以并发地处理多个请求和回复。也就是说，你可以连续地向数据库发送用户 &lt;code&gt;a&lt;/code&gt; 、 &lt;code&gt;b&lt;/code&gt; 、 &lt;code&gt;c&lt;/code&gt;  等的请求，与此同时，哪个请求的回复先返回了就处理哪个回复，从而连续的请求之间不需要阻塞等待，如上图右边所示。这也正是 Async I/O 的实现原理。&lt;/p&gt;
+&lt;h2 id=&#34;async-io&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#async-io&#34;&gt;#&lt;/a&gt; Async I/O&lt;/h2&gt;
+&lt;p&gt;使用 Async I/O 的前提是需要一个支持异步请求的客户端。当然，没有异步请求客户端的话也可以将同步客户端丢到线程池中执行作为异步客户端。Flink 提供了非常简洁的 API，让用户只需要关注业务逻辑，一些脏活累活比如消息顺序性和一致性保证都由框架处理了，多么棒的事情！&lt;/p&gt;
+&lt;p&gt;使用方式如下方代码片段所示（来自官网文档）：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;/** &#39;AsyncFunction&#39; 的一个实现，向数据库发送异步请求并设置回调 */
+class AsyncDatabaseRequest extends AsyncFunction[String, (String, String)] &amp;#123;
+
+    /** 可以异步请求的特定数据库的客户端 */
+    lazy val client: DatabaseClient = new DatabaseClient(host, post, credentials)
+
+    /** future 的回调的执行上下文（当前线程） */
+    implicit lazy val executor: ExecutionContext = ExecutionContext.fromExecutor(Executors.directExecutor())
+
+    override def asyncInvoke(str: String, asyncCollector: AsyncCollector[(String, String)]): Unit = &amp;#123;
+
+        // 发起一个异步请求，返回结果的 future
+        val resultFuture: Future[String] = client.query(str)
+
+        // 设置请求完成时的回调: 将结果传递给 collector
+        resultFuture.onSuccess &amp;#123;
+            case result: String =&amp;gt; asyncCollector.collect(Iterable((str, result)));
+        &amp;#125;
+    &amp;#125;
+&amp;#125;
+
+// 创建一个原始的流
+val stream: DataStream[String] = ...
+
+// 添加一个 async I/O 的转换
+val resultStream: DataStream[(String, String)] =
+    AsyncDataStream.(un)orderedWait(
+      stream, new AsyncDatabaseRequest(),
+      1000, TimeUnit.MILLISECONDS, // 超时时间
+      100)  // 进行中的异步请求的最大数量
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;code&gt;AsyncDataStream&lt;/code&gt;  有两个静态方法， &lt;code&gt;orderedWait&lt;/code&gt;  和  &lt;code&gt;unorderedWait&lt;/code&gt; ，对应了两种输出模式：有序和无序。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;有序：消息的发送顺序与接受到的顺序相同（包括 watermark ），也就是先进先出。&lt;/li&gt;
+&lt;li&gt;无序：
+&lt;ul&gt;
+&lt;li&gt;在 ProcessingTime 的情况下，完全无序，先返回的结果先发送。&lt;/li&gt;
+&lt;li&gt;在 EventTime 的情况下，watermark 不能超越消息，消息也不能超越 watermark，也就是说 watermark 定义的顺序的边界。在两个 watermark 之间的消息的发送是无序的，但是在 watermark 之后的消息不能先于该 watermark 之前的消息发送。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;原理实现&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#原理实现&#34;&gt;#&lt;/a&gt; 原理实现&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;AsyncDataStream.(un)orderedWait&lt;/code&gt;  的主要工作就是创建了一个  &lt;code&gt;AsyncWaitOperator&lt;/code&gt; 。 &lt;code&gt;AsyncWaitOperator&lt;/code&gt;  是支持异步 IO 访问的算子实现，该算子会运行  &lt;code&gt;AsyncFunction&lt;/code&gt;  并处理异步返回的结果，其内部原理如下图所示。&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1tBPQRXXXXXX2aXXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;如图所示， &lt;code&gt;AsyncWaitOperator&lt;/code&gt;  主要由两部分组成： &lt;code&gt;StreamElementQueue&lt;/code&gt;  和  &lt;code&gt;Emitter&lt;/code&gt; 。StreamElementQueue 是一个 Promise 队列，所谓 Promise 是一种异步抽象表示将来会有一个值（参考 &lt;span class=&#34;exturl&#34; data-url=&#34;aHR0cDovL2RvY3Muc2NhbGEtbGFuZy5vcmcvemgtY24vb3ZlcnZpZXdzL2NvcmUvZnV0dXJlcy5odG1sI3Byb21pc2Vz&#34;&gt;Scala Promise&lt;/span&gt; 了解更多），这个队列是未完成的 Promise 队列，也就是进行中的请求队列。Emitter 是一个单独的线程，负责发送消息（收到的异步回复）给下游。&lt;/p&gt;
+&lt;p&gt;图中 &lt;code&gt;E5&lt;/code&gt;  表示进入该算子的第五个元素（”Element-5”），在执行过程中首先会将其包装成一个 “Promise”  &lt;code&gt;P5&lt;/code&gt; ，然后将 &lt;code&gt;P5&lt;/code&gt;  放入队列。最后调用  &lt;code&gt;AsyncFunction&lt;/code&gt;  的  &lt;code&gt;ayncInvoke&lt;/code&gt;  方法，该方法会向外部服务发起一个异步的请求，并注册回调。该回调会在异步请求成功返回时调用  &lt;code&gt;AsyncCollector.collect&lt;/code&gt;  方法将返回的结果交给框架处理。实际上  &lt;code&gt;AsyncCollector&lt;/code&gt;  是一个 Promise ，也就是  &lt;code&gt;P5&lt;/code&gt; ，在调用  &lt;code&gt;collect&lt;/code&gt;  的时候会标记 Promise 为完成状态，并通知 Emitter 线程有完成的消息可以发送了。Emitter 就会从队列中拉取完成的 Promise ，并从 Promise 中取出消息发送给下游。&lt;/p&gt;
+&lt;h3 id=&#34;消息的顺序性&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#消息的顺序性&#34;&gt;#&lt;/a&gt; 消息的顺序性&lt;/h3&gt;
+&lt;p&gt;上文提到 Async I/O 提供了两种输出模式。其实细分有三种模式：有序，ProcessingTime 无序，EventTime 无序。Flink 使用队列来实现不同的输出模式，并抽象出一个队列的接口（ &lt;code&gt;StreamElementQueue&lt;/code&gt; ），这种分层设计使得 &lt;code&gt;AsyncWaitOperator&lt;/code&gt;  和 &lt;code&gt;Emitter&lt;/code&gt;  不用关心消息的顺序问题。 &lt;code&gt;StreamElementQueue&lt;/code&gt;  有两种具体实现，分别是  &lt;code&gt;OrderedStreamElementQueue&lt;/code&gt;  和  &lt;code&gt;UnorderedStreamElementQueue&lt;/code&gt; 。 &lt;code&gt;UnorderedStreamElementQueue&lt;/code&gt;  比较有意思，它使用了一套逻辑巧妙地实现完全无序和 EventTime 无序。&lt;/p&gt;
+&lt;h4 id=&#34;有序&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#有序&#34;&gt;#&lt;/a&gt; 有序&lt;/h4&gt;
+&lt;p&gt;有序比较简单，使用一个队列就能实现。所有新进入该算子的元素（包括 watermark），都会包装成 Promise 并按到达顺序放入该队列。如下图所示，尽管 &lt;code&gt;P4&lt;/code&gt;  的结果先返回，但并不会发送，只有  &lt;code&gt;P1&lt;/code&gt;  （队首）的结果返回了才会触发 Emitter 拉取队首元素进行发送。&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB16DYTRXXXXXbWXVXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;h4 id=&#34;processingtime-无序&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#processingtime-无序&#34;&gt;#&lt;/a&gt; ProcessingTime 无序&lt;/h4&gt;
+&lt;p&gt;ProcessingTime 无序也比较简单，因为没有 watermark，不需要协调 watermark 与消息的顺序性，所以使用两个队列就能实现，一个  &lt;code&gt;uncompletedQueue&lt;/code&gt;  一个  &lt;code&gt;completedQueue&lt;/code&gt; 。所有新进入该算子的元素，同样的包装成 Promise 并放入  &lt;code&gt;uncompletedQueue&lt;/code&gt;  队列，当 &lt;code&gt;uncompletedQueue&lt;/code&gt;  队列中任意的 Promise 返回了数据，则将该 Promise 移到  &lt;code&gt;completedQueue&lt;/code&gt;  队列中，并通知 Emitter 消费。如下图所示：&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1zzsnRXXXXXbNXXXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;h4 id=&#34;eventtime-无序&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#eventtime-无序&#34;&gt;#&lt;/a&gt; EventTime 无序&lt;/h4&gt;
+&lt;p&gt;EventTime 无序类似于有序与 ProcessingTime 无序的结合体。因为有 watermark，需要协调 watermark 与消息之间的顺序性，所以 &lt;code&gt;uncompletedQueue&lt;/code&gt;  中存放的元素从原先的 Promise 变成了 Promise 集合。如果进入算子的是消息元素，则会包装成 Promise 放入队尾的集合中。如果进入算子的是 watermark，也会包装成 Promise 并放到一个独立的集合中，再将该集合加入到  &lt;code&gt;uncompletedQueue&lt;/code&gt;  队尾，最后再创建一个空集合加到  &lt;code&gt;uncompletedQueue&lt;/code&gt;  队尾。这样，watermark 就成了消息顺序的边界。只有处在队首的集合中的 Promise 返回了数据，才能将该 Promise 移到  &lt;code&gt;completedQueue&lt;/code&gt;  队列中，由 Emitter 消费发往下游。只有队首集合空了，才能处理第二个集合。这样就保证了当且仅当某个 watermark 之前所有的消息都已经被发送了，该 watermark 才能被发送。过程如下图所示：&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1TnrsRXXXXXaKaVXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;快照与恢复&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#快照与恢复&#34;&gt;#&lt;/a&gt; 快照与恢复&lt;/h3&gt;
+&lt;p&gt;分布式快照机制是为了保证状态的一致性。我们需要分析哪些状态是需要快照的，哪些是不需要的。首先，已经完成回调并且已经发往下游的元素是不需要快照的。否则，会导致重发，那就不是 exactly-once 了。而已经完成回调且未发往下游的元素，加上未完成回调的元素，就是上述队列中的所有元素。&lt;/p&gt;
+&lt;p&gt;所以快照的逻辑也非常简单，(1) 清空原有的状态存储，(2) 遍历队列中的所有 Promise，从中取出  &lt;code&gt;StreamElement&lt;/code&gt; （消息或 watermark）并放入状态存储中，(3) 执行快照操作。&lt;/p&gt;
+&lt;p&gt;恢复的时候，从快照中读取所有的元素全部再处理一次，当然包括之前已完成回调的元素。所以在失败恢复后，会有元素重复请求外部服务，但是每个回调的结果只会被发往下游一次。&lt;/p&gt;
+</content>
+        <category term="大数据" scheme="https://github.com/Mayizono/miyazono.github.io/categories/big-data/" />
+        <category term="Flink" scheme="https://github.com/Mayizono/miyazono.github.io/categories/big-data/flink/" />
+        <updated>2020-10-04T16:00:00.000Z</updated>
+    </entry>
+    <entry>
+        <id>https://github.com/Mayizono/miyazono.github.io/big-data/flink/Flink%E7%9A%84%E6%9E%B6%E6%9E%84/</id>
+        <title>Flink的架构</title>
+        <link rel="alternate" href="https://github.com/Mayizono/miyazono.github.io/big-data/flink/Flink%E7%9A%84%E6%9E%B6%E6%9E%84/"/>
+        <content type="html">&lt;h2 id=&#34;架构&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#架构&#34;&gt;#&lt;/a&gt; 架构&lt;/h2&gt;
+&lt;p&gt;要了解一个系统，一般都是从架构开始。我们关心的问题是：系统部署成功后各个节点都启动了哪些服务，各个服务之间又是怎么交互和协调的。下方是 Flink 集群启动后架构图。&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1ObBnJFXXXXXtXVXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;当 Flink 集群启动后，首先会启动一个 JobManger 和一个或多个的 TaskManager。由 Client 提交任务给 JobManager，JobManager 再调度任务到各个 TaskManager 去执行，然后 TaskManager 将心跳和统计信息汇报给 JobManager。TaskManager 之间以流的形式进行数据的传输。上述三者均为独立的 JVM 进程。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Client&lt;/strong&gt; 为提交 Job 的客户端，可以是运行在任何机器上（与 JobManager 环境连通即可）。提交 Job 后，Client 可以结束进程（Streaming 的任务），也可以不结束并等待结果返回。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;JobManager&lt;/strong&gt; 主要负责调度 Job 并协调 Task 做 checkpoint，职责上很像 Storm 的 Nimbus。从 Client 处接收到 Job 和 JAR 包等资源后，会生成优化后的执行计划，并以 Task 的单元调度到各个 TaskManager 去执行。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;TaskManager&lt;/strong&gt; 在启动的时候就设置好了槽位数（Slot），每个 slot 能启动一个 Task，Task 为线程。从 JobManager 处接收需要部署的 Task，部署启动后，与自己的上游建立 Netty 连接，接收数据并处理。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;可以看到 Flink 的任务调度是多线程模型，并且不同 Job/Task 混合在一个 TaskManager 进程中。虽然这种方式可以有效提高 CPU 利用率，但是个人不太喜欢这种设计，因为不仅缺乏资源隔离机制，同时也不方便调试。类似 Storm 的进程模型，一个 JVM 中只跑该 Job 的 Tasks 实际应用中更为合理。&lt;/p&gt;
+&lt;h2 id=&#34;job-例子&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#job-例子&#34;&gt;#&lt;/a&gt; Job 例子&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;本文所示例子为 flink-1.0.x 版本&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;我们使用 Flink 自带的 examples 包中的  &lt;code&gt;SocketTextStreamWordCount&lt;/code&gt; ，这是一个从 socket 流中统计单词出现次数的例子。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;首先，使用 &lt;strong&gt;netcat&lt;/strong&gt; 启动本地服务器：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ nc -l 9000
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;然后提交 Flink 程序&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ bin/flink run examples/streaming/SocketTextStreamWordCount.jar \
+  --hostname 10.218.130.9 \
+  --port 9000
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在 netcat 端输入单词并监控 taskmanager 的输出可以看到单词统计的结果。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;SocketTextStreamWordCount&lt;/code&gt;  的具体代码如下：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;public static void main(String[] args) throws Exception &amp;#123;
+  // 检查输入
+  final ParameterTool params = ParameterTool.fromArgs(args);
+  ...
+
+  // set up the execution environment
+  final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+
+  // get input data
+  DataStream&amp;lt;String&amp;gt; text =
+      env.socketTextStream(params.get(&amp;quot;hostname&amp;quot;), params.getInt(&amp;quot;port&amp;quot;), &#39;\n&#39;, 0);
+
+  DataStream&amp;lt;Tuple2&amp;lt;String, Integer&amp;gt;&amp;gt; counts =
+      // split up the lines in pairs (2-tuples) containing: (word,1)
+      text.flatMap(new Tokenizer())
+          // group by the tuple field &amp;quot;0&amp;quot; and sum up tuple field &amp;quot;1&amp;quot;
+          .keyBy(0)
+          .sum(1);
+  counts.print();
+  
+  // execute program
+  env.execute(&amp;quot;WordCount from SocketTextStream Example&amp;quot;);
+&amp;#125;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;我们将最后一行代码  &lt;code&gt;env.execute&lt;/code&gt;  替换成  &lt;code&gt;System.out.println(env.getExecutionPlan());&lt;/code&gt;  并在本地运行该代码（并发度设为 2），可以得到该拓扑的逻辑执行计划图的 JSON 串，将该 JSON 串粘贴到 &lt;span class=&#34;exturl&#34; data-url=&#34;aHR0cDovL2ZsaW5rLmFwYWNoZS5vcmcvdmlzdWFsaXplci8=&#34;&gt;http://flink.apache.org/visualizer/&lt;/span&gt; 中，能可视化该执行图。&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1vB1uJFXXXXbaXpXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;但这并不是最终在 Flink 中运行的执行图，只是一个表示拓扑节点关系的计划图，在 Flink 中对应了 SteramGraph。另外，提交拓扑后（并发度设为 2）还能在 UI 中看到另一张执行计划图，如下所示，该图对应了 Flink 中的 JobGraph。&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1QKR2JFXXXXbyaXXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;graph&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#graph&#34;&gt;#&lt;/a&gt; Graph&lt;/h2&gt;
+&lt;p&gt;看起来有点乱，怎么有这么多不一样的图。实际上，还有更多的图。Flink 中的执行图可以分成四层：StreamGraph -&amp;gt; JobGraph -&amp;gt; ExecutionGraph -&amp;gt; 物理执行图。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;**StreamGraph：** 是根据用户通过 Stream API 编写的代码生成的最初的图。用来表示程序的拓扑结构。&lt;/li&gt;
+&lt;li&gt;**JobGraph：**StreamGraph 经过优化后生成了 JobGraph，提交给 JobManager 的数据结构。主要的优化为，将多个符合条件的节点 chain 在一起作为一个节点，这样可以减少数据在节点之间流动所需要的序列化 / 反序列化 / 传输消耗。&lt;/li&gt;
+&lt;li&gt;**ExecutionGraph：**JobManager 根据 JobGraph 生成 ExecutionGraph。ExecutionGraph 是 JobGraph 的并行化版本，是调度层最核心的数据结构。&lt;/li&gt;
+&lt;li&gt;** 物理执行图：**JobManager 根据 ExecutionGraph 对 Job 进行调度后，在各个 TaskManager 上部署 Task 后形成的 “图”，并不是一个具体的数据结构。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;例如上文中的 2 个并发度（Source 为 1 个并发度）的  &lt;code&gt;SocketTextStreamWordCount&lt;/code&gt;  四层执行图的演变过程如下图所示（点击查看大图）：&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1tA_GJFXXXXapXFXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;这里对一些名词进行简单的解释。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;StreamGraph：&lt;/p&gt;
+&lt;p&gt;根据用户通过 Stream API 编写的代码生成的最初的图。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;StreamNode：用来代表 operator 的类，并具有所有相关的属性，如并发度、入边和出边等。&lt;/li&gt;
+&lt;li&gt;StreamEdge：表示连接两个 StreamNode 的边。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;JobGraph：&lt;/p&gt;
+&lt;p&gt;StreamGraph 经过优化后生成了 JobGraph，提交给 JobManager 的数据结构。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;JobVertex：经过优化后符合条件的多个 StreamNode 可能会 chain 在一起生成一个 JobVertex，即一个 JobVertex 包含一个或多个 operator，JobVertex 的输入是 JobEdge，输出是 IntermediateDataSet。&lt;/li&gt;
+&lt;li&gt;IntermediateDataSet：表示 JobVertex 的输出，即经过 operator 处理产生的数据集。producer 是 JobVertex，consumer 是 JobEdge。&lt;/li&gt;
+&lt;li&gt;JobEdge：代表了 job graph 中的一条数据传输通道。source 是 IntermediateDataSet，target 是 JobVertex。即数据通过 JobEdge 由 IntermediateDataSet 传递给目标 JobVertex。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;ExecutionGraph：&lt;/p&gt;
+&lt;p&gt;JobManager 根据 JobGraph 生成 ExecutionGraph。ExecutionGraph 是 JobGraph 的并行化版本，是调度层最核心的数据结构。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;ExecutionJobVertex：和 JobGraph 中的 JobVertex 一一对应。每一个 ExecutionJobVertex 都有和并发度一样多的 ExecutionVertex。&lt;/li&gt;
+&lt;li&gt;ExecutionVertex：表示 ExecutionJobVertex 的其中一个并发子任务，输入是 ExecutionEdge，输出是 IntermediateResultPartition。&lt;/li&gt;
+&lt;li&gt;IntermediateResult：和 JobGraph 中的 IntermediateDataSet 一一对应。一个 IntermediateResult 包含多个 IntermediateResultPartition，其个数等于该 operator 的并发度。&lt;/li&gt;
+&lt;li&gt;IntermediateResultPartition：表示 ExecutionVertex 的一个输出分区，producer 是 ExecutionVertex，consumer 是若干个 ExecutionEdge。&lt;/li&gt;
+&lt;li&gt;ExecutionEdge：表示 ExecutionVertex 的输入，source 是 IntermediateResultPartition，target 是 ExecutionVertex。source 和 target 都只能是一个。&lt;/li&gt;
+&lt;li&gt;Execution：是执行一个 ExecutionVertex 的一次尝试。当发生故障或者数据需要重算的情况下 ExecutionVertex 可能会有多个 ExecutionAttemptID。一个 Execution 通过 ExecutionAttemptID 来唯一标识。JM 和 TM 之间关于 task 的部署和 task status 的更新都是通过 ExecutionAttemptID 来确定消息接受者。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;物理执行图：&lt;/p&gt;
+&lt;p&gt;JobManager 根据 ExecutionGraph 对 Job 进行调度后，在各个 TaskManager 上部署 Task 后形成的 “图”，并不是一个具体的数据结构。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Task：Execution 被调度后在分配的 TaskManager 中启动对应的 Task。Task 包裹了具有用户执行逻辑的 operator。&lt;/li&gt;
+&lt;li&gt;ResultPartition：代表由一个 Task 的生成的数据，和 ExecutionGraph 中的 IntermediateResultPartition 一一对应。&lt;/li&gt;
+&lt;li&gt;ResultSubpartition：是 ResultPartition 的一个子分区。每个 ResultPartition 包含多个 ResultSubpartition，其数目要由下游消费 Task 数和 DistributionPattern 来决定。&lt;/li&gt;
+&lt;li&gt;InputGate：代表 Task 的输入封装，和 JobGraph 中 JobEdge 一一对应。每个 InputGate 消费了一个或多个的 ResultPartition。&lt;/li&gt;
+&lt;li&gt;InputChannel：每个 InputGate 会包含一个以上的 InputChannel，和 ExecutionGraph 中的 ExecutionEdge 一一对应，也和 ResultSubpartition 一对一地相连，即一个 InputChannel 接收一个 ResultSubpartition 的输出。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;那么 Flink 为什么要设计这 4 张图呢，其目的是什么呢？Spark 中也有多张图，数据依赖图以及物理执行的 DAG。其目的都是一样的，就是解耦，每张图各司其职，每张图对应了 Job 不同的阶段，更方便做该阶段的事情。我们给出更完整的 Flink Graph 的层次图。&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1qmtpJVXXXXagXXXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;首先我们看到，JobGraph 之上除了 StreamGraph 还有 OptimizedPlan。OptimizedPlan 是由 Batch API 转换而来的。StreamGraph 是由 Stream API 转换而来的。为什么 API 不直接转换成 JobGraph？因为，Batch 和 Stream 的图结构和优化方法有很大的区别，比如 Batch 有很多执行前的预分析用来优化图的执行，而这种优化并不普适于 Stream，所以通过 OptimizedPlan 来做 Batch 的优化会更方便和清晰，也不会影响 Stream。JobGraph 的责任就是统一 Batch 和 Stream 的图，用来描述清楚一个拓扑图的结构，并且做了 chaining 的优化，chaining 是普适于 Batch 和 Stream 的，所以在这一层做掉。ExecutionGraph 的责任是方便调度和各个 tasks 状态的监控和跟踪，所以 ExecutionGraph 是并行化的 JobGraph。而 “物理执行图” 就是最终分布式在各个机器上运行着的 tasks 了。所以可以看到，这种解耦方式极大地方便了我们在各个层所做的工作，各个层之间是相互隔离的。&lt;/p&gt;
+</content>
+        <category term="大数据" scheme="https://github.com/Mayizono/miyazono.github.io/categories/big-data/" />
+        <category term="Flink" scheme="https://github.com/Mayizono/miyazono.github.io/categories/big-data/flink/" />
+        <updated>2020-10-04T16:00:00.000Z</updated>
+    </entry>
+    <entry>
+        <id>https://github.com/Mayizono/miyazono.github.io/big-data/flink/Flink%E7%9A%84%E5%BC%82%E6%AD%A5IO/</id>
+        <title>Flink的架构</title>
+        <link rel="alternate" href="https://github.com/Mayizono/miyazono.github.io/big-data/flink/Flink%E7%9A%84%E5%BC%82%E6%AD%A5IO/"/>
+        <content type="html">&lt;h2 id=&#34;背景&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#背景&#34;&gt;#&lt;/a&gt; 背景&lt;/h2&gt;
+&lt;p&gt;Async I/O 是阿里巴巴贡献给社区的一个呼声非常高的特性，于 1.2 版本引入。主要目的是为了解决与外部系统交互时网络延迟成为了系统瓶颈的问题。&lt;/p&gt;
+&lt;p&gt;流计算系统中经常需要与外部系统进行交互，比如需要查询外部数据库以关联上用户的额外信息。通常，我们的实现方式是向数据库发送用户 &lt;code&gt;a&lt;/code&gt;  的查询请求，然后等待结果返回，在这之前，我们无法发送用户 &lt;code&gt;b&lt;/code&gt;  的查询请求。这是一种同步访问的模式，如下图左边所示。&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB11fwcRXXXXXXwXpXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;图中棕色的长条表示等待时间，可以发现网络等待时间极大地阻碍了吞吐和延迟。为了解决同步访问的问题，异步模式可以并发地处理多个请求和回复。也就是说，你可以连续地向数据库发送用户 &lt;code&gt;a&lt;/code&gt; 、 &lt;code&gt;b&lt;/code&gt; 、 &lt;code&gt;c&lt;/code&gt;  等的请求，与此同时，哪个请求的回复先返回了就处理哪个回复，从而连续的请求之间不需要阻塞等待，如上图右边所示。这也正是 Async I/O 的实现原理。&lt;/p&gt;
+&lt;h2 id=&#34;async-io&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#async-io&#34;&gt;#&lt;/a&gt; Async I/O&lt;/h2&gt;
+&lt;p&gt;使用 Async I/O 的前提是需要一个支持异步请求的客户端。当然，没有异步请求客户端的话也可以将同步客户端丢到线程池中执行作为异步客户端。Flink 提供了非常简洁的 API，让用户只需要关注业务逻辑，一些脏活累活比如消息顺序性和一致性保证都由框架处理了，多么棒的事情！&lt;/p&gt;
+&lt;p&gt;使用方式如下方代码片段所示（来自官网文档）：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;/** &#39;AsyncFunction&#39; 的一个实现，向数据库发送异步请求并设置回调 */
+class AsyncDatabaseRequest extends AsyncFunction[String, (String, String)] &amp;#123;
+
+    /** 可以异步请求的特定数据库的客户端 */
+    lazy val client: DatabaseClient = new DatabaseClient(host, post, credentials)
+
+    /** future 的回调的执行上下文（当前线程） */
+    implicit lazy val executor: ExecutionContext = ExecutionContext.fromExecutor(Executors.directExecutor())
+
+    override def asyncInvoke(str: String, asyncCollector: AsyncCollector[(String, String)]): Unit = &amp;#123;
+
+        // 发起一个异步请求，返回结果的 future
+        val resultFuture: Future[String] = client.query(str)
+
+        // 设置请求完成时的回调: 将结果传递给 collector
+        resultFuture.onSuccess &amp;#123;
+            case result: String =&amp;gt; asyncCollector.collect(Iterable((str, result)));
+        &amp;#125;
+    &amp;#125;
+&amp;#125;
+
+// 创建一个原始的流
+val stream: DataStream[String] = ...
+
+// 添加一个 async I/O 的转换
+val resultStream: DataStream[(String, String)] =
+    AsyncDataStream.(un)orderedWait(
+      stream, new AsyncDatabaseRequest(),
+      1000, TimeUnit.MILLISECONDS, // 超时时间
+      100)  // 进行中的异步请求的最大数量
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;code&gt;AsyncDataStream&lt;/code&gt;  有两个静态方法， &lt;code&gt;orderedWait&lt;/code&gt;  和  &lt;code&gt;unorderedWait&lt;/code&gt; ，对应了两种输出模式：有序和无序。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;有序：消息的发送顺序与接受到的顺序相同（包括 watermark ），也就是先进先出。&lt;/li&gt;
+&lt;li&gt;无序：
+&lt;ul&gt;
+&lt;li&gt;在 ProcessingTime 的情况下，完全无序，先返回的结果先发送。&lt;/li&gt;
+&lt;li&gt;在 EventTime 的情况下，watermark 不能超越消息，消息也不能超越 watermark，也就是说 watermark 定义的顺序的边界。在两个 watermark 之间的消息的发送是无序的，但是在 watermark 之后的消息不能先于该 watermark 之前的消息发送。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;原理实现&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#原理实现&#34;&gt;#&lt;/a&gt; 原理实现&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;AsyncDataStream.(un)orderedWait&lt;/code&gt;  的主要工作就是创建了一个  &lt;code&gt;AsyncWaitOperator&lt;/code&gt; 。 &lt;code&gt;AsyncWaitOperator&lt;/code&gt;  是支持异步 IO 访问的算子实现，该算子会运行  &lt;code&gt;AsyncFunction&lt;/code&gt;  并处理异步返回的结果，其内部原理如下图所示。&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1tBPQRXXXXXX2aXXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;如图所示， &lt;code&gt;AsyncWaitOperator&lt;/code&gt;  主要由两部分组成： &lt;code&gt;StreamElementQueue&lt;/code&gt;  和  &lt;code&gt;Emitter&lt;/code&gt; 。StreamElementQueue 是一个 Promise 队列，所谓 Promise 是一种异步抽象表示将来会有一个值（参考 &lt;span class=&#34;exturl&#34; data-url=&#34;aHR0cDovL2RvY3Muc2NhbGEtbGFuZy5vcmcvemgtY24vb3ZlcnZpZXdzL2NvcmUvZnV0dXJlcy5odG1sI3Byb21pc2Vz&#34;&gt;Scala Promise&lt;/span&gt; 了解更多），这个队列是未完成的 Promise 队列，也就是进行中的请求队列。Emitter 是一个单独的线程，负责发送消息（收到的异步回复）给下游。&lt;/p&gt;
+&lt;p&gt;图中 &lt;code&gt;E5&lt;/code&gt;  表示进入该算子的第五个元素（”Element-5”），在执行过程中首先会将其包装成一个 “Promise”  &lt;code&gt;P5&lt;/code&gt; ，然后将 &lt;code&gt;P5&lt;/code&gt;  放入队列。最后调用  &lt;code&gt;AsyncFunction&lt;/code&gt;  的  &lt;code&gt;ayncInvoke&lt;/code&gt;  方法，该方法会向外部服务发起一个异步的请求，并注册回调。该回调会在异步请求成功返回时调用  &lt;code&gt;AsyncCollector.collect&lt;/code&gt;  方法将返回的结果交给框架处理。实际上  &lt;code&gt;AsyncCollector&lt;/code&gt;  是一个 Promise ，也就是  &lt;code&gt;P5&lt;/code&gt; ，在调用  &lt;code&gt;collect&lt;/code&gt;  的时候会标记 Promise 为完成状态，并通知 Emitter 线程有完成的消息可以发送了。Emitter 就会从队列中拉取完成的 Promise ，并从 Promise 中取出消息发送给下游。&lt;/p&gt;
+&lt;h3 id=&#34;消息的顺序性&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#消息的顺序性&#34;&gt;#&lt;/a&gt; 消息的顺序性&lt;/h3&gt;
+&lt;p&gt;上文提到 Async I/O 提供了两种输出模式。其实细分有三种模式：有序，ProcessingTime 无序，EventTime 无序。Flink 使用队列来实现不同的输出模式，并抽象出一个队列的接口（ &lt;code&gt;StreamElementQueue&lt;/code&gt; ），这种分层设计使得 &lt;code&gt;AsyncWaitOperator&lt;/code&gt;  和 &lt;code&gt;Emitter&lt;/code&gt;  不用关心消息的顺序问题。 &lt;code&gt;StreamElementQueue&lt;/code&gt;  有两种具体实现，分别是  &lt;code&gt;OrderedStreamElementQueue&lt;/code&gt;  和  &lt;code&gt;UnorderedStreamElementQueue&lt;/code&gt; 。 &lt;code&gt;UnorderedStreamElementQueue&lt;/code&gt;  比较有意思，它使用了一套逻辑巧妙地实现完全无序和 EventTime 无序。&lt;/p&gt;
+&lt;h4 id=&#34;有序&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#有序&#34;&gt;#&lt;/a&gt; 有序&lt;/h4&gt;
+&lt;p&gt;有序比较简单，使用一个队列就能实现。所有新进入该算子的元素（包括 watermark），都会包装成 Promise 并按到达顺序放入该队列。如下图所示，尽管 &lt;code&gt;P4&lt;/code&gt;  的结果先返回，但并不会发送，只有  &lt;code&gt;P1&lt;/code&gt;  （队首）的结果返回了才会触发 Emitter 拉取队首元素进行发送。&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB16DYTRXXXXXbWXVXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;h4 id=&#34;processingtime-无序&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#processingtime-无序&#34;&gt;#&lt;/a&gt; ProcessingTime 无序&lt;/h4&gt;
+&lt;p&gt;ProcessingTime 无序也比较简单，因为没有 watermark，不需要协调 watermark 与消息的顺序性，所以使用两个队列就能实现，一个  &lt;code&gt;uncompletedQueue&lt;/code&gt;  一个  &lt;code&gt;completedQueue&lt;/code&gt; 。所有新进入该算子的元素，同样的包装成 Promise 并放入  &lt;code&gt;uncompletedQueue&lt;/code&gt;  队列，当 &lt;code&gt;uncompletedQueue&lt;/code&gt;  队列中任意的 Promise 返回了数据，则将该 Promise 移到  &lt;code&gt;completedQueue&lt;/code&gt;  队列中，并通知 Emitter 消费。如下图所示：&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1zzsnRXXXXXbNXXXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;h4 id=&#34;eventtime-无序&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#eventtime-无序&#34;&gt;#&lt;/a&gt; EventTime 无序&lt;/h4&gt;
+&lt;p&gt;EventTime 无序类似于有序与 ProcessingTime 无序的结合体。因为有 watermark，需要协调 watermark 与消息之间的顺序性，所以 &lt;code&gt;uncompletedQueue&lt;/code&gt;  中存放的元素从原先的 Promise 变成了 Promise 集合。如果进入算子的是消息元素，则会包装成 Promise 放入队尾的集合中。如果进入算子的是 watermark，也会包装成 Promise 并放到一个独立的集合中，再将该集合加入到  &lt;code&gt;uncompletedQueue&lt;/code&gt;  队尾，最后再创建一个空集合加到  &lt;code&gt;uncompletedQueue&lt;/code&gt;  队尾。这样，watermark 就成了消息顺序的边界。只有处在队首的集合中的 Promise 返回了数据，才能将该 Promise 移到  &lt;code&gt;completedQueue&lt;/code&gt;  队列中，由 Emitter 消费发往下游。只有队首集合空了，才能处理第二个集合。这样就保证了当且仅当某个 watermark 之前所有的消息都已经被发送了，该 watermark 才能被发送。过程如下图所示：&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1TnrsRXXXXXaKaVXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;快照与恢复&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#快照与恢复&#34;&gt;#&lt;/a&gt; 快照与恢复&lt;/h3&gt;
+&lt;p&gt;分布式快照机制是为了保证状态的一致性。我们需要分析哪些状态是需要快照的，哪些是不需要的。首先，已经完成回调并且已经发往下游的元素是不需要快照的。否则，会导致重发，那就不是 exactly-once 了。而已经完成回调且未发往下游的元素，加上未完成回调的元素，就是上述队列中的所有元素。&lt;/p&gt;
+&lt;p&gt;所以快照的逻辑也非常简单，(1) 清空原有的状态存储，(2) 遍历队列中的所有 Promise，从中取出  &lt;code&gt;StreamElement&lt;/code&gt; （消息或 watermark）并放入状态存储中，(3) 执行快照操作。&lt;/p&gt;
+&lt;p&gt;恢复的时候，从快照中读取所有的元素全部再处理一次，当然包括之前已完成回调的元素。所以在失败恢复后，会有元素重复请求外部服务，但是每个回调的结果只会被发往下游一次。&lt;/p&gt;
+</content>
+        <category term="大数据" scheme="https://github.com/Mayizono/miyazono.github.io/categories/big-data/" />
+        <category term="Flink" scheme="https://github.com/Mayizono/miyazono.github.io/categories/big-data/flink/" />
+        <updated>2020-10-04T16:00:00.000Z</updated>
+    </entry>
+    <entry>
         <id>https://github.com/Mayizono/miyazono.github.io/big-data/flink/Flink%E7%9A%84Window%E6%9C%BA%E5%88%B6/</id>
         <title>Flink的窗口机制</title>
         <link rel="alternate" href="https://github.com/Mayizono/miyazono.github.io/big-data/flink/Flink%E7%9A%84Window%E6%9C%BA%E5%88%B6/"/>
