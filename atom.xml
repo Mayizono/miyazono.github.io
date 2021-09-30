@@ -258,84 +258,6 @@
         <updated>2020-10-09T16:00:00.000Z</updated>
     </entry>
     <entry>
-        <id>https://github.com/Mayizono/miyazono.github.io/big-data/flink/Flink%E7%9A%84%E5%BC%82%E6%AD%A5IO%20-%20%E5%89%AF%E6%9C%AC/</id>
-        <title>Flink的架构</title>
-        <link rel="alternate" href="https://github.com/Mayizono/miyazono.github.io/big-data/flink/Flink%E7%9A%84%E5%BC%82%E6%AD%A5IO%20-%20%E5%89%AF%E6%9C%AC/"/>
-        <content type="html">&lt;h2 id=&#34;背景&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#背景&#34;&gt;#&lt;/a&gt; 背景&lt;/h2&gt;
-&lt;p&gt;Async I/O 是阿里巴巴贡献给社区的一个呼声非常高的特性，于 1.2 版本引入。主要目的是为了解决与外部系统交互时网络延迟成为了系统瓶颈的问题。&lt;/p&gt;
-&lt;p&gt;流计算系统中经常需要与外部系统进行交互，比如需要查询外部数据库以关联上用户的额外信息。通常，我们的实现方式是向数据库发送用户 &lt;code&gt;a&lt;/code&gt;  的查询请求，然后等待结果返回，在这之前，我们无法发送用户 &lt;code&gt;b&lt;/code&gt;  的查询请求。这是一种同步访问的模式，如下图左边所示。&lt;/p&gt;
-&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB11fwcRXXXXXXwXpXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;图中棕色的长条表示等待时间，可以发现网络等待时间极大地阻碍了吞吐和延迟。为了解决同步访问的问题，异步模式可以并发地处理多个请求和回复。也就是说，你可以连续地向数据库发送用户 &lt;code&gt;a&lt;/code&gt; 、 &lt;code&gt;b&lt;/code&gt; 、 &lt;code&gt;c&lt;/code&gt;  等的请求，与此同时，哪个请求的回复先返回了就处理哪个回复，从而连续的请求之间不需要阻塞等待，如上图右边所示。这也正是 Async I/O 的实现原理。&lt;/p&gt;
-&lt;h2 id=&#34;async-io&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#async-io&#34;&gt;#&lt;/a&gt; Async I/O&lt;/h2&gt;
-&lt;p&gt;使用 Async I/O 的前提是需要一个支持异步请求的客户端。当然，没有异步请求客户端的话也可以将同步客户端丢到线程池中执行作为异步客户端。Flink 提供了非常简洁的 API，让用户只需要关注业务逻辑，一些脏活累活比如消息顺序性和一致性保证都由框架处理了，多么棒的事情！&lt;/p&gt;
-&lt;p&gt;使用方式如下方代码片段所示（来自官网文档）：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;/** &#39;AsyncFunction&#39; 的一个实现，向数据库发送异步请求并设置回调 */
-class AsyncDatabaseRequest extends AsyncFunction[String, (String, String)] &amp;#123;
-
-    /** 可以异步请求的特定数据库的客户端 */
-    lazy val client: DatabaseClient = new DatabaseClient(host, post, credentials)
-
-    /** future 的回调的执行上下文（当前线程） */
-    implicit lazy val executor: ExecutionContext = ExecutionContext.fromExecutor(Executors.directExecutor())
-
-    override def asyncInvoke(str: String, asyncCollector: AsyncCollector[(String, String)]): Unit = &amp;#123;
-
-        // 发起一个异步请求，返回结果的 future
-        val resultFuture: Future[String] = client.query(str)
-
-        // 设置请求完成时的回调: 将结果传递给 collector
-        resultFuture.onSuccess &amp;#123;
-            case result: String =&amp;gt; asyncCollector.collect(Iterable((str, result)));
-        &amp;#125;
-    &amp;#125;
-&amp;#125;
-
-// 创建一个原始的流
-val stream: DataStream[String] = ...
-
-// 添加一个 async I/O 的转换
-val resultStream: DataStream[(String, String)] =
-    AsyncDataStream.(un)orderedWait(
-      stream, new AsyncDatabaseRequest(),
-      1000, TimeUnit.MILLISECONDS, // 超时时间
-      100)  // 进行中的异步请求的最大数量
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;code&gt;AsyncDataStream&lt;/code&gt;  有两个静态方法， &lt;code&gt;orderedWait&lt;/code&gt;  和  &lt;code&gt;unorderedWait&lt;/code&gt; ，对应了两种输出模式：有序和无序。&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;有序：消息的发送顺序与接受到的顺序相同（包括 watermark ），也就是先进先出。&lt;/li&gt;
-&lt;li&gt;无序：
-&lt;ul&gt;
-&lt;li&gt;在 ProcessingTime 的情况下，完全无序，先返回的结果先发送。&lt;/li&gt;
-&lt;li&gt;在 EventTime 的情况下，watermark 不能超越消息，消息也不能超越 watermark，也就是说 watermark 定义的顺序的边界。在两个 watermark 之间的消息的发送是无序的，但是在 watermark 之后的消息不能先于该 watermark 之前的消息发送。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;原理实现&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#原理实现&#34;&gt;#&lt;/a&gt; 原理实现&lt;/h2&gt;
-&lt;p&gt;&lt;code&gt;AsyncDataStream.(un)orderedWait&lt;/code&gt;  的主要工作就是创建了一个  &lt;code&gt;AsyncWaitOperator&lt;/code&gt; 。 &lt;code&gt;AsyncWaitOperator&lt;/code&gt;  是支持异步 IO 访问的算子实现，该算子会运行  &lt;code&gt;AsyncFunction&lt;/code&gt;  并处理异步返回的结果，其内部原理如下图所示。&lt;/p&gt;
-&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1tBPQRXXXXXX2aXXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;如图所示， &lt;code&gt;AsyncWaitOperator&lt;/code&gt;  主要由两部分组成： &lt;code&gt;StreamElementQueue&lt;/code&gt;  和  &lt;code&gt;Emitter&lt;/code&gt; 。StreamElementQueue 是一个 Promise 队列，所谓 Promise 是一种异步抽象表示将来会有一个值（参考 &lt;span class=&#34;exturl&#34; data-url=&#34;aHR0cDovL2RvY3Muc2NhbGEtbGFuZy5vcmcvemgtY24vb3ZlcnZpZXdzL2NvcmUvZnV0dXJlcy5odG1sI3Byb21pc2Vz&#34;&gt;Scala Promise&lt;/span&gt; 了解更多），这个队列是未完成的 Promise 队列，也就是进行中的请求队列。Emitter 是一个单独的线程，负责发送消息（收到的异步回复）给下游。&lt;/p&gt;
-&lt;p&gt;图中 &lt;code&gt;E5&lt;/code&gt;  表示进入该算子的第五个元素（”Element-5”），在执行过程中首先会将其包装成一个 “Promise”  &lt;code&gt;P5&lt;/code&gt; ，然后将 &lt;code&gt;P5&lt;/code&gt;  放入队列。最后调用  &lt;code&gt;AsyncFunction&lt;/code&gt;  的  &lt;code&gt;ayncInvoke&lt;/code&gt;  方法，该方法会向外部服务发起一个异步的请求，并注册回调。该回调会在异步请求成功返回时调用  &lt;code&gt;AsyncCollector.collect&lt;/code&gt;  方法将返回的结果交给框架处理。实际上  &lt;code&gt;AsyncCollector&lt;/code&gt;  是一个 Promise ，也就是  &lt;code&gt;P5&lt;/code&gt; ，在调用  &lt;code&gt;collect&lt;/code&gt;  的时候会标记 Promise 为完成状态，并通知 Emitter 线程有完成的消息可以发送了。Emitter 就会从队列中拉取完成的 Promise ，并从 Promise 中取出消息发送给下游。&lt;/p&gt;
-&lt;h3 id=&#34;消息的顺序性&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#消息的顺序性&#34;&gt;#&lt;/a&gt; 消息的顺序性&lt;/h3&gt;
-&lt;p&gt;上文提到 Async I/O 提供了两种输出模式。其实细分有三种模式：有序，ProcessingTime 无序，EventTime 无序。Flink 使用队列来实现不同的输出模式，并抽象出一个队列的接口（ &lt;code&gt;StreamElementQueue&lt;/code&gt; ），这种分层设计使得 &lt;code&gt;AsyncWaitOperator&lt;/code&gt;  和 &lt;code&gt;Emitter&lt;/code&gt;  不用关心消息的顺序问题。 &lt;code&gt;StreamElementQueue&lt;/code&gt;  有两种具体实现，分别是  &lt;code&gt;OrderedStreamElementQueue&lt;/code&gt;  和  &lt;code&gt;UnorderedStreamElementQueue&lt;/code&gt; 。 &lt;code&gt;UnorderedStreamElementQueue&lt;/code&gt;  比较有意思，它使用了一套逻辑巧妙地实现完全无序和 EventTime 无序。&lt;/p&gt;
-&lt;h4 id=&#34;有序&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#有序&#34;&gt;#&lt;/a&gt; 有序&lt;/h4&gt;
-&lt;p&gt;有序比较简单，使用一个队列就能实现。所有新进入该算子的元素（包括 watermark），都会包装成 Promise 并按到达顺序放入该队列。如下图所示，尽管 &lt;code&gt;P4&lt;/code&gt;  的结果先返回，但并不会发送，只有  &lt;code&gt;P1&lt;/code&gt;  （队首）的结果返回了才会触发 Emitter 拉取队首元素进行发送。&lt;/p&gt;
-&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB16DYTRXXXXXbWXVXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
-&lt;h4 id=&#34;processingtime-无序&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#processingtime-无序&#34;&gt;#&lt;/a&gt; ProcessingTime 无序&lt;/h4&gt;
-&lt;p&gt;ProcessingTime 无序也比较简单，因为没有 watermark，不需要协调 watermark 与消息的顺序性，所以使用两个队列就能实现，一个  &lt;code&gt;uncompletedQueue&lt;/code&gt;  一个  &lt;code&gt;completedQueue&lt;/code&gt; 。所有新进入该算子的元素，同样的包装成 Promise 并放入  &lt;code&gt;uncompletedQueue&lt;/code&gt;  队列，当 &lt;code&gt;uncompletedQueue&lt;/code&gt;  队列中任意的 Promise 返回了数据，则将该 Promise 移到  &lt;code&gt;completedQueue&lt;/code&gt;  队列中，并通知 Emitter 消费。如下图所示：&lt;/p&gt;
-&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1zzsnRXXXXXbNXXXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
-&lt;h4 id=&#34;eventtime-无序&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#eventtime-无序&#34;&gt;#&lt;/a&gt; EventTime 无序&lt;/h4&gt;
-&lt;p&gt;EventTime 无序类似于有序与 ProcessingTime 无序的结合体。因为有 watermark，需要协调 watermark 与消息之间的顺序性，所以 &lt;code&gt;uncompletedQueue&lt;/code&gt;  中存放的元素从原先的 Promise 变成了 Promise 集合。如果进入算子的是消息元素，则会包装成 Promise 放入队尾的集合中。如果进入算子的是 watermark，也会包装成 Promise 并放到一个独立的集合中，再将该集合加入到  &lt;code&gt;uncompletedQueue&lt;/code&gt;  队尾，最后再创建一个空集合加到  &lt;code&gt;uncompletedQueue&lt;/code&gt;  队尾。这样，watermark 就成了消息顺序的边界。只有处在队首的集合中的 Promise 返回了数据，才能将该 Promise 移到  &lt;code&gt;completedQueue&lt;/code&gt;  队列中，由 Emitter 消费发往下游。只有队首集合空了，才能处理第二个集合。这样就保证了当且仅当某个 watermark 之前所有的消息都已经被发送了，该 watermark 才能被发送。过程如下图所示：&lt;/p&gt;
-&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1TnrsRXXXXXaKaVXXXXXXXXXX&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
-&lt;h3 id=&#34;快照与恢复&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#快照与恢复&#34;&gt;#&lt;/a&gt; 快照与恢复&lt;/h3&gt;
-&lt;p&gt;分布式快照机制是为了保证状态的一致性。我们需要分析哪些状态是需要快照的，哪些是不需要的。首先，已经完成回调并且已经发往下游的元素是不需要快照的。否则，会导致重发，那就不是 exactly-once 了。而已经完成回调且未发往下游的元素，加上未完成回调的元素，就是上述队列中的所有元素。&lt;/p&gt;
-&lt;p&gt;所以快照的逻辑也非常简单，(1) 清空原有的状态存储，(2) 遍历队列中的所有 Promise，从中取出  &lt;code&gt;StreamElement&lt;/code&gt; （消息或 watermark）并放入状态存储中，(3) 执行快照操作。&lt;/p&gt;
-&lt;p&gt;恢复的时候，从快照中读取所有的元素全部再处理一次，当然包括之前已完成回调的元素。所以在失败恢复后，会有元素重复请求外部服务，但是每个回调的结果只会被发往下游一次。&lt;/p&gt;
-</content>
-        <category term="大数据" scheme="https://github.com/Mayizono/miyazono.github.io/categories/big-data/" />
-        <category term="Flink" scheme="https://github.com/Mayizono/miyazono.github.io/categories/big-data/flink/" />
-        <updated>2020-10-04T16:00:00.000Z</updated>
-    </entry>
-    <entry>
         <id>https://github.com/Mayizono/miyazono.github.io/big-data/flink/Flink%E7%9A%84%E6%9E%B6%E6%9E%84/</id>
         <title>Flink的架构</title>
         <link rel="alternate" href="https://github.com/Mayizono/miyazono.github.io/big-data/flink/Flink%E7%9A%84%E6%9E%B6%E6%9E%84/"/>
@@ -461,7 +383,7 @@ val resultStream: DataStream[(String, String)] =
     </entry>
     <entry>
         <id>https://github.com/Mayizono/miyazono.github.io/big-data/flink/Flink%E7%9A%84%E5%BC%82%E6%AD%A5IO/</id>
-        <title>Flink的架构</title>
+        <title>Flink的异步IO</title>
         <link rel="alternate" href="https://github.com/Mayizono/miyazono.github.io/big-data/flink/Flink%E7%9A%84%E5%BC%82%E6%AD%A5IO/"/>
         <content type="html">&lt;h2 id=&#34;背景&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#背景&#34;&gt;#&lt;/a&gt; 背景&lt;/h2&gt;
 &lt;p&gt;Async I/O 是阿里巴巴贡献给社区的一个呼声非常高的特性，于 1.2 版本引入。主要目的是为了解决与外部系统交互时网络延迟成为了系统瓶颈的问题。&lt;/p&gt;
@@ -532,6 +454,40 @@ val resultStream: DataStream[(String, String)] =
 &lt;p&gt;分布式快照机制是为了保证状态的一致性。我们需要分析哪些状态是需要快照的，哪些是不需要的。首先，已经完成回调并且已经发往下游的元素是不需要快照的。否则，会导致重发，那就不是 exactly-once 了。而已经完成回调且未发往下游的元素，加上未完成回调的元素，就是上述队列中的所有元素。&lt;/p&gt;
 &lt;p&gt;所以快照的逻辑也非常简单，(1) 清空原有的状态存储，(2) 遍历队列中的所有 Promise，从中取出  &lt;code&gt;StreamElement&lt;/code&gt; （消息或 watermark）并放入状态存储中，(3) 执行快照操作。&lt;/p&gt;
 &lt;p&gt;恢复的时候，从快照中读取所有的元素全部再处理一次，当然包括之前已完成回调的元素。所以在失败恢复后，会有元素重复请求外部服务，但是每个回调的结果只会被发往下游一次。&lt;/p&gt;
+</content>
+        <category term="大数据" scheme="https://github.com/Mayizono/miyazono.github.io/categories/big-data/" />
+        <category term="Flink" scheme="https://github.com/Mayizono/miyazono.github.io/categories/big-data/flink/" />
+        <updated>2020-10-04T16:00:00.000Z</updated>
+    </entry>
+    <entry>
+        <id>https://github.com/Mayizono/miyazono.github.io/big-data/flink/Flink%E7%AE%A1%E7%90%86Kafka%E7%9A%84%E6%B6%88%E8%B4%B9%E4%BD%8D%E7%82%B9/</id>
+        <title>Flink管理 Kafka 消费位点</title>
+        <link rel="alternate" href="https://github.com/Mayizono/miyazono.github.io/big-data/flink/Flink%E7%AE%A1%E7%90%86Kafka%E7%9A%84%E6%B6%88%E8%B4%B9%E4%BD%8D%E7%82%B9/"/>
+        <content type="html">&lt;p&gt;检查点（Checkpoint）是使 Apache Flink 能从故障恢复的一种内部机制。检查点是 Flink 应用状态的一个一致性副本，包括了输入的读取位点。在发生故障时，Flink 通过从检查点加载应用程序状态来恢复，并从恢复的读取位点继续处理，就好像什么事情都没发生一样。你可以把检查点想象成电脑游戏的存档一样。如果你在游戏中发生了什么事情，你可以随时读档重来一次。&lt;/p&gt;
+&lt;p&gt;检查点使得 Apache Flink 具有容错能力，并确保了即时发生故障也能保证流应用程序的语义。检查点是以固定的间隔来触发的，该间隔可以在应用中配置。&lt;/p&gt;
+&lt;p&gt;Apache Flink 中实现的 Kafka 消费者是一个有状态的算子（operator），它集成了 Flink 的检查点机制，它的状态是所有 Kafka 分区的读取偏移量。当一个检查点被触发时，每一个分区的偏移量都被存到了这个检查点中。Flink 的检查点机制保证了所有 operator task 的存储状态都是一致的。这里的 “一致的” 是什么意思呢？意思是它们存储的状态都是&lt;strong&gt;基于相同的输入数据&lt;/strong&gt;。当所有的 operator task 成功存储了它们的状态，一个检查点才算完成。因此，当从潜在的系统故障中恢复时，系统提供了 excatly-once 的状态更新语义。&lt;/p&gt;
+&lt;p&gt;下面我们将一步步地介绍 Apache Flink 中的 Kafka 消费位点是如何做检查点的。在本文的例子中，数据被存在了 Flink 的 JobMaster 中。值得注意的是，在 POC 或生产用例下，这些数据最好是能存到一个外部文件系统（如 HDFS 或 S3）中。&lt;/p&gt;
+&lt;h3 id=&#34;第一步&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#第一步&#34;&gt;#&lt;/a&gt; 第一步：&lt;/h3&gt;
+&lt;p&gt;如下所示，一个 Kafka topic，有两个 partition，每个 partition 都含有 “A”, “B”, “C”, ”D”, “E” 5 条消息。我们将两个 partition 的偏移量（offset）都设置为 0.&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1QQ91nhTpK1RjSZR0XXbEwXXa-842-415.png&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;第二步&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#第二步&#34;&gt;#&lt;/a&gt; 第二步：&lt;/h3&gt;
+&lt;p&gt;Kafka comsumer（消费者）开始从 partition 0 读取消息。消息 “A” 正在被处理，第一个 consumer 的 offset 变成了 1。&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1jBS2nb2pK1RjSZFsXXaNlXXa-842-420.png&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;第三步&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#第三步&#34;&gt;#&lt;/a&gt; 第三步：&lt;/h3&gt;
+&lt;p&gt;消息 “A” 到达了 Flink Map Task。两个 consumer 都开始读取他们下一条消息（partition 0 读取 “B”，partition 1 读取 “A”）。各自将 offset 更新成 2 和 1 。同时，Flink 的 JobMaster 开始在 source 触发了一个检查点。&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1ZNS8nkvoK1RjSZFNXXcxMVXa-842-423.png&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;第四步&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#第四步&#34;&gt;#&lt;/a&gt; 第四步：&lt;/h3&gt;
+&lt;p&gt;接下来，由于 source 触发了检查点，Kafka consumer 创建了它们状态的第一个快照（”offset = 2, 1”），并将快照存到了 Flink 的 JobMaster 中。Source 在消息 “B” 和 “A” 从 partition 0 和 1 发出后，发了一个 checkpoint barrier。Checkopint barrier 用于各个 operator task 之间对齐检查点，保证了整个检查点的一致性。消息 “A” 到达了 Flink Map Task，而上面的 consumer 继续读取下一条消息（消息 “C”）。&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1o4TbnkzoK1RjSZFlXXai4VXa-842-447.png&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;第五步&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#第五步&#34;&gt;#&lt;/a&gt; 第五步：&lt;/h3&gt;
+&lt;p&gt;Flink Map Task 收齐了同一版本的全部 checkpoint barrier 后，那么就会将它自己的状态也存储到 JobMaster。同时，consumer 会继续从 Kafka 读取消息。&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1EI2XngHqK1RjSZFkXXX.WFXa-842-439.png&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;第六步&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#第六步&#34;&gt;#&lt;/a&gt; 第六步：&lt;/h3&gt;
+&lt;p&gt;Flink Map Task 完成了它自己状态的快照流程后，会向 Flink JobMaster 汇报它已经完成了这个 checkpoint。当所有的 task 都报告完成了它们的状态 checkpoint 后，JobMaster 就会将这个 checkpoint 标记为成功。从此刻开始，这个 checkpoint 就可以用于故障恢复了。值得一提的是，Flink 并不依赖 Kafka offset 从系统故障中恢复。&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://miyazono-1255488789.cos.ap-shanghai.myqcloud.com/markdown/TB1huHtnhnaK1RjSZFBXXcW7VXa-842-417.png&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;故障恢复&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#故障恢复&#34;&gt;#&lt;/a&gt; 故障恢复&lt;/h3&gt;
+&lt;p&gt;在发生故障时（比如，某个 worker 挂了），所有的 operator task 会被重启，而他们的状态会被重置到最近一次成功的 checkpoint。Kafka source 分别从 offset 2 和 1 重新开始读取消息（因为这是完成的 checkpoint 中存的 offset）。当作业重启后，我们可以期待正常的系统操作，就好像之前没有发生故障一样。如下图所示：&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&#34;https://img.alicdn.com/tfs/TB1o8zXnmzqK1RjSZFjXXblCFXa-842-411.png&#34; alt=&#34;image&#34; /&gt;&lt;/p&gt;
 </content>
         <category term="大数据" scheme="https://github.com/Mayizono/miyazono.github.io/categories/big-data/" />
         <category term="Flink" scheme="https://github.com/Mayizono/miyazono.github.io/categories/big-data/flink/" />
